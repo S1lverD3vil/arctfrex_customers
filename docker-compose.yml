@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - DB_HOST=my_postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=mysecret
+      - DB_NAME=arctfrex
+    ports:
+      - "8443:8443" # Map API port to localhost
+    depends_on:
+      - db # Ensure the DB starts before the API
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecret
+      POSTGRES_DB: arctfrex
+    ports:
+      - "5432:5432" # Map PostgreSQL port to localhost
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
