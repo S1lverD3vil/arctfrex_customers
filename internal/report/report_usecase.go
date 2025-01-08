@@ -1,0 +1,109 @@
+package report
+
+import (
+	"arctfrex-customers/internal/deposit"
+	"fmt"
+	"reflect"
+)
+
+type ReportUsecase interface {
+	GetActiveReports() (*[]Report, error)
+	GetActiveReportsByCode(reportCode string) (*ReportData, error)
+}
+
+type reportUsecase struct {
+	reportRepository  ReportRepository
+	depositRepository deposit.DepositRepository
+	reportApiClient   ReportApiClient
+}
+
+func NewReportUsecase(
+	rr ReportRepository,
+	dr deposit.DepositRepository,
+	rac ReportApiClient,
+) *reportUsecase {
+	return &reportUsecase{
+		reportRepository:  rr,
+		depositRepository: dr,
+		reportApiClient:   rac,
+	}
+}
+
+func (ru *reportUsecase) GetActiveReports() (*[]Report, error) {
+	reports, err := ru.reportRepository.GetActiveReports()
+	if err != nil {
+		return &[]Report{}, err
+	}
+
+	return reports, nil
+}
+
+func (ru *reportUsecase) GetActiveReportsByCode(reportCode string) (*ReportData, error) {
+	reportData := ReportData{
+		Code: reportCode,
+	}
+
+	switch reportCode {
+	case "R_DT":
+		{
+			deposits, err := ru.depositRepository.GetBackOfficePendingDeposits()
+			// log.Println("data deposit")
+			//log.Println(*deposits)
+			// if deposits == nil || err != nil {
+			if len(*deposits) == 0 {
+				reportData.Data = []interface{}{}
+				return &reportData, err
+			}
+
+			reportData.Data = deposits
+		}
+	case "R_MANIFEST":
+		{
+			accountGetManifestResponse, err := ru.reportApiClient.GetAccountsManifest()
+			if err != nil {
+				fmt.Println("Error getting account manifest:", err)
+				return &ReportData{}, err
+			}
+
+			var columns []string
+			var items []AccountGetManifestResponse
+			items = append(items, *accountGetManifestResponse)
+
+			// Create an instance of the struct
+			p := AccountGetManifestResponse{}
+
+			// Get the type of the struct
+			typ := reflect.TypeOf(p)
+
+			// Iterate over the fields
+			for i := 0; i < typ.NumField(); i++ {
+				columns = append(columns, typ.Field(i).Name)
+			}
+
+			reportData.Column = columns
+			reportData.Data = items
+		}
+	default:
+		{
+			deposits, err := ru.depositRepository.GetBackOfficePendingDeposits()
+			// log.Println("default data deposit")
+			// log.Println(deposits)
+			// if deposits == nil || err != nil {
+			// 	reportData.Data = []string{}
+			// 	return &reportData, err
+			// }
+			if len(*deposits) == 0 {
+				reportData.Data = []interface{}{}
+				return &reportData, err
+			}
+
+			reportData.Data = deposits
+		}
+	}
+	//reports, err := ru.reportRepository.GetActiveReports()
+	// if err != nil {
+	// 	return &ReportData{}, err
+	// }
+
+	return &reportData, nil
+}
