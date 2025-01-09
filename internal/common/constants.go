@@ -42,4 +42,5 @@ const (
 	specialCharset                               = "!@#$%^&*()-_+=<>?~"
 	allCharset                                   = lowerCharset + upperCharset + numberCharset + specialCharset
 	passwordLength                               = 12 // Minimum recommended length
+	ARC_META_INTEGRATOR_BASEURL                  = "ARC_META_INTEGRATOR_BASEURL"
 )

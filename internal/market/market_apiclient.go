@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"time"
 )
 
@@ -32,7 +33,7 @@ func (s *marketApiclient) GetLatestMarketPrice() (ArcMetaIntegratorPrice, error)
 	}
 
 	// Create a new request
-	req, err := http.NewRequest(common.HTTP_METHOD_GET, "https://meta-integrator-arctfrex.ngrok.app/api/prices?symbol=AUDJPY.fl,CHFJPY.fl,EURCAD.fl,EURGBP.fl,EURUSD.fl", nil)
+	req, err := http.NewRequest(common.HTTP_METHOD_GET, os.Getenv(common.ARC_META_INTEGRATOR_BASEURL)+"/prices?symbol=AUDJPY.fl,CHFJPY.fl,EURCAD.fl,EURGBP.fl,EURUSD.fl", nil)
 	// req, err := http.NewRequest(common.HTTP_METHOD_GET, "https://enabled-simply-moth.ngrok-free.app/api/prices?symbol=AUDJPY.fl,CHFJPY.fl,EURCAD.fl,EURGBP.fl,EURUSD.fl", nil)
 	// req, err := http.NewRequest(common.HTTP_METHOD_GET, "https://enabled-simply-moth.ngrok-free.app/api/prices?symbol=AUDJPY.fl,CHFJPY.fl,EURCAD.fl,EURGBP.fl,EURUSD.fl", nil)
 	// req, err := http.NewRequest(common.HTTP_METHOD_GET, "https://enabled-simply-moth.ngrok-free.app/api/prices?symbol=AUDCAD,AUDCHF,AUDNZD,AUDUSD,EURUSD,GBPUSD,USDCAD,USDCHF,USDJPY", nil)

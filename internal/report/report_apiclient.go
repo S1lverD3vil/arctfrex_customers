@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"time"
 )
 
@@ -30,7 +31,7 @@ func (s *reportApiClient) GetAccountsManifest() (*AccountGetManifestResponse, er
 	}
 
 	// Create a new request
-	req, err := http.NewRequest(common.HTTP_METHOD_GET, "https://meta-integrator-arctfrex.ngrok.app/api/clients/AccountGet", nil)
+	req, err := http.NewRequest(common.HTTP_METHOD_GET, os.Getenv(common.ARC_META_INTEGRATOR_BASEURL)+"/clients/AccountGet", nil)
 	// req, err := http.NewRequest(common.HTTP_METHOD_GET, "http://localhost:3000/arctfrex/api/clients/AccountGet", nil)
 	// req, err := http.NewRequest(common.HTTP_METHOD_GET, "https://marketdata.tradermade.com/api/v1/live", nil)
 	if err != nil {

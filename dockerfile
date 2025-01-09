@@ -40,7 +40,8 @@ ENV GO111MODULE=on \
     MINIO_ENDPOINT_SECURED=false \
     MINIO_ACCESS_KEY=riFjlIyURmjokSIgNWej \ 
     MINIO_SECRET_KEY=7aba7M3oLAwkZaQaMz3V5MN0CkYQtwdtIauQzxMQ \
-    BUCKET_NAME=arctfrex
+    BUCKET_NAME=arctfrex \
+    ARC_META_INTEGRATOR_BASEURL=https://arcmetaintegrator.arctfrex.com/api
 
 # Set the working directory
 WORKDIR /app

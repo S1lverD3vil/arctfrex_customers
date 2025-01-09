@@ -1,12 +1,14 @@
 package user
 
 import (
+	"arctfrex-customers/internal/common"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -36,8 +38,7 @@ func (s *userApiclient) ClientAdd(clientAdd ClientAdd) (ClientAdd, error) {
 	}
 
 	// Create a new POST request
-	req, err := http.NewRequest(http.MethodPost, "https://meta-integrator-arctfrex.ngrok.app/api/Clients/Add", bytes.NewBuffer(jsonBody))
-	// req, err := http.NewRequest(http.MethodPost, "https://enabled-simply-moth.ngrok-free.app/api/Clients/Add", bytes.NewBuffer(jsonBody))
+	req, err := http.NewRequest(http.MethodPost, os.Getenv(common.ARC_META_INTEGRATOR_BASEURL)+"/Clients/Add", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		fmt.Println("Error creating request:", err)
 		return clientAdd, err
@@ -92,8 +93,7 @@ func (s *userApiclient) DemoAccountTopUp(demoAccountTopUp DemoAccountTopUp) (Dem
 	}
 
 	// Create a new POST request
-	req, err := http.NewRequest(http.MethodPost, "https://meta-integrator-arctfrex.ngrok.app/api/Trade/Add", bytes.NewBuffer(jsonBody))
-	// req, err := http.NewRequest(http.MethodPost, "https://enabled-simply-moth.ngrok-free.app/api/Trade/Add", bytes.NewBuffer(jsonBody))
+	req, err := http.NewRequest(http.MethodPost, os.Getenv(common.ARC_META_INTEGRATOR_BASEURL)+"/Trade/Add", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		fmt.Println("Error creating request:", err)
 		return demoAccountTopUp, err
