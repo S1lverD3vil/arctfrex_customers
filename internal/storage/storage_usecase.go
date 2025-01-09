@@ -54,7 +54,7 @@ func (su *storageUsecase) UploadFile(userId, accountId, documentType, contentTyp
 		}
 	}
 
-	pathUrl := "https://" + os.Getenv(common.MINIO_ENDPOINT) + "/" + os.Getenv(common.MINIO_BUCKET_NAME)
+	pathUrl := "https://" + os.Getenv(common.MINIO_BASEURL) + "/" + os.Getenv(common.MINIO_BUCKET_NAME)
 	fileName = time.Now().Format("20060102150405") + "_" + documentType + "_" + fileName
 	filePath := pathUrl + "/" + fileName
 	fmt.Println(contentType)

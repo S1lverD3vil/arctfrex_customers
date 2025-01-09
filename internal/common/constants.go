@@ -31,6 +31,7 @@ const (
 	LOG_CONSOLE_BLUE                             = "\033[34m"
 	LOG_CONSOLE_CYAN                             = "\033[36m"
 	MINIO_ENDPOINT                               = "MINIO_ENDPOINT"
+	MINIO_BASEURL                                = "MINIO_BASEURL"
 	MINIO_ENDPOINT_SECURED                       = "MINIO_ENDPOINT_SECURED"
 	MINIO_ACCESS_KEY                             = "MINIO_ACCESS_KEY"
 	MINIO_SECRET_KEY                             = "MINIO_SECRET_KEY"
