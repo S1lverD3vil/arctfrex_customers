@@ -509,8 +509,8 @@ func getMarketCountry(marketCountries []MarketCountry, currencyCode string) (Mar
 func mapForexToMarket(forexPrice ArcMetaIntegratorPriceData) *Market {
 	return &Market{
 		Code:          forexPrice.Symbol,
-		BaseCurrency:  forexPrice.Symbol[:3],
-		QuoteCurrency: forexPrice.Symbol[3:6],
+		BaseCurrency:  safeSubstring(forexPrice.Symbol, 0, 3),
+		QuoteCurrency: safeSubstring(forexPrice.Symbol, 3, 6),
 		Price:         forexPrice.Last,
 		Ask:           forexPrice.Ask,
 		Bid:           forexPrice.Bid,
@@ -525,6 +525,17 @@ func mapForexToMarket(forexPrice ArcMetaIntegratorPriceData) *Market {
 		BaseModel: base.BaseModel{IsActive: true},
 	}
 
+}
+
+// Helper function to safely extract a substring
+func safeSubstring(input string, start, end int) string {
+	if len(input) < start {
+		return "" // Return empty string if the start index is out of range
+	}
+	if len(input) < end {
+		return input[start:] // Return substring from start to the end of the string
+	}
+	return input[start:end] // Return the full slice
 }
 
 // // Function to map ForexPriceResponse to Market
