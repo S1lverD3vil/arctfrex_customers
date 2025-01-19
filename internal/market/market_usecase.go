@@ -510,7 +510,7 @@ func mapForexToMarket(forexPrice ArcMetaIntegratorPriceData) *Market {
 	return &Market{
 		Code:          forexPrice.Symbol,
 		BaseCurrency:  forexPrice.Symbol[:3],
-		QuoteCurrency: forexPrice.Symbol[3:],
+		QuoteCurrency: forexPrice.Symbol[3:6],
 		Price:         forexPrice.Last,
 		Ask:           forexPrice.Ask,
 		Bid:           forexPrice.Bid,
