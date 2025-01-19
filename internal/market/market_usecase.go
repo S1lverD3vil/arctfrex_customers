@@ -390,7 +390,7 @@ func (mu *marketUsecase) PriceUpdates() error {
 	}
 
 	for _, forexData := range forexDatas.Data {
-		forexData.Symbol = strings.TrimSuffix(forexData.Symbol, ".fl")
+		// forexData.Symbol = strings.TrimSuffix(forexData.Symbol, ".fl")
 		market, _ := mu.marketRepository.GetMarketByCode(forexData.Symbol)
 		// changedAmount := float64(common.GenerateRandomNumber(1, 10))
 		// forexData.Change += changedAmount / 100

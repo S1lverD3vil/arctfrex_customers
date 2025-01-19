@@ -45,7 +45,7 @@ func NewDB() *gorm.DB {
 	if err != nil {
 		panic("failed to connect database")
 	}
-
+	// fmt.Println("Connected to database")
 	databaseProfiling, _ := strconv.ParseBool(os.Getenv(common.DATABASE_PROFILING))
 
 	if databaseProfiling {

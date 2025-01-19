@@ -31,6 +31,7 @@ func NewMinioClient(endpoint, accessKey, secretKey, bucketName string) (*MinioCl
 	if err != nil {
 		return nil, err
 	}
+	// fmt.Println("Connected to Minio")
 
 	// Create a bucket if it doesn't exist.
 	err = createBucket(minioClient, bucketName)

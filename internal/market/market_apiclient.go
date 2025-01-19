@@ -33,7 +33,8 @@ func (s *marketApiclient) GetLatestMarketPrice() (ArcMetaIntegratorPrice, error)
 	}
 
 	// Create a new request
-	req, err := http.NewRequest(common.HTTP_METHOD_GET, os.Getenv(common.ARC_META_INTEGRATOR_BASEURL)+"/prices?symbol=AUDJPY.fl,CHFJPY.fl,EURCAD.fl,EURGBP.fl,EURUSD.fl", nil)
+	req, err := http.NewRequest(common.HTTP_METHOD_GET, os.Getenv(common.ARC_META_INTEGRATOR_BASEURL)+"/prices/get?symbol=XAUUSD.pkn,XAGUSD.pkn,USDJPY.pkn,JPK.pk,HKK.pk,GBPUSD.pkn,EURUSD.pkn,EURCHF.pkn,EURCAD.pkn,EURAUD.pkn,DJ.pk,CLSK.pkn,CHFJPY.pkn,AUDUSD.pkn,AUDNZD.pkn,AUDJPY.pkn", nil)
+	// req, err := http.NewRequest(common.HTTP_METHOD_GET, os.Getenv(common.ARC_META_INTEGRATOR_BASEURL)+"/prices?symbol=AUDJPY.fl,CHFJPY.fl,EURCAD.fl,EURGBP.fl,EURUSD.fl", nil)
 	// req, err := http.NewRequest(common.HTTP_METHOD_GET, "https://enabled-simply-moth.ngrok-free.app/api/prices?symbol=AUDJPY.fl,CHFJPY.fl,EURCAD.fl,EURGBP.fl,EURUSD.fl", nil)
 	// req, err := http.NewRequest(common.HTTP_METHOD_GET, "https://enabled-simply-moth.ngrok-free.app/api/prices?symbol=AUDJPY.fl,CHFJPY.fl,EURCAD.fl,EURGBP.fl,EURUSD.fl", nil)
 	// req, err := http.NewRequest(common.HTTP_METHOD_GET, "https://enabled-simply-moth.ngrok-free.app/api/prices?symbol=AUDCAD,AUDCHF,AUDNZD,AUDUSD,EURUSD,GBPUSD,USDCAD,USDCHF,USDJPY", nil)

@@ -49,8 +49,8 @@ func (ou *orderUsecase) Orders(webSocketRequest WebSocketRequest) (*[]Orders, ac
 	if err != nil || account == nil || account.ID == common.STRING_EMPTY {
 		return nil, *account, errors.New("record not found")
 	}
-	changedAmount := float64(common.GenerateRandomNumber(1, 1000))
-	account.Equity += changedAmount
+	// changedAmount := float64(common.GenerateRandomNumber(1, 1000))
+	// account.Equity += changedAmount
 	//log.Println(webSocketRequest)
 	switch strings.ToLower(webSocketRequest.FilterBy) {
 	case "code":
