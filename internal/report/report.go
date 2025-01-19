@@ -163,7 +163,7 @@ type AccountGetManifestResponse struct {
 	PresentasiAllProfit     Presentasi `json:"PresentasiAllProfit"`
 }
 
-type ReportProfitLossData struct {
+type ReportProfitLossDataResponse struct {
 	MetaLoginID           int64   `json:"MetaLoginID"`
 	Name                  string  `json:"Name"`
 	DomCity               string  `json:"DomCity"`

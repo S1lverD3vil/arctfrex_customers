@@ -109,9 +109,14 @@ func (ru *reportUsecase) GetActiveReportsByCode(reportCode string) (*ReportData,
 			for i := 0; i < typ.NumField(); i++ {
 				columns = append(columns, typ.Field(i).Name)
 			}
+			// Map to JSON response struct
+			response := make([]ReportProfitLossDataResponse, len(*reportProfitLossData))
+			for i, data := range *reportProfitLossData {
+				response[i] = mapToResponse(data)
+			}
 
 			reportData.Column = columns
-			reportData.Data = reportProfitLossData
+			reportData.Data = response
 		}
 	default:
 		{
@@ -136,4 +141,30 @@ func (ru *reportUsecase) GetActiveReportsByCode(reportCode string) (*ReportData,
 	// }
 
 	return &reportData, nil
+}
+
+func mapToResponse(data account.ReportProfitLossData) ReportProfitLossDataResponse {
+	return ReportProfitLossDataResponse{
+		MetaLoginID:           data.MetaLoginID,
+		Name:                  data.Name,
+		DomCity:               data.DomCity,
+		Currency:              data.Currency,
+		CurrencyRate:          data.CurrencyRate,
+		TotalDepositAmount:    data.TotalDepositAmount,
+		TotalWithdrawalAmount: data.TotalWithdrawalAmount,
+		PrevEquity:            data.PrevEquity,
+		Nmii:                  data.Nmii,
+		LastEquity:            data.LastEquity,
+		GrossProfit:           data.GrossProfit,
+		GrossProfitUSD:        data.GrossProfitUSD,
+		SingleSideLot:         data.SingleSideLot,
+		Commission:            data.Commission,
+		Rebate:                data.Rebate,
+		PrevBadDebt:           data.PrevBadDebt,
+		LastBadDebt:           data.LastBadDebt,
+		NetProfit:             data.NetProfit,
+		NetProfitUSD:          data.NetProfitUSD,
+		AccountID:             data.AccountID,
+		UserID:                data.UserID,
+	}
 }
