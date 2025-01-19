@@ -163,6 +163,30 @@ type AccountGetManifestResponse struct {
 	PresentasiAllProfit     Presentasi `json:"PresentasiAllProfit"`
 }
 
+type ReportProfitLossData struct {
+	MetaLoginID           int64   `json:"MetaLoginID"`
+	Name                  string  `json:"Name"`
+	DomCity               string  `json:"DomCity"`
+	Currency              string  `json:"Currency"`
+	CurrencyRate          float64 `json:"CurrencyRate"`
+	TotalDepositAmount    float64 `json:"TotalDepositAmount"`
+	TotalWithdrawalAmount float64 `json:"TotalWithdrawalAmount"`
+	PrevEquity            float64 `json:"PrevEquity"`
+	Nmii                  float64 `json:"Nmii"`
+	LastEquity            float64 `json:"LastEquity"`
+	GrossProfit           float64 `json:"GrossProfit"`
+	GrossProfitUSD        float64 `json:"GrossProfitUSD"`
+	SingleSideLot         float64 `json:"SingleSideLot"`
+	Commission            float64 `json:"Commission"`
+	Rebate                float64 `json:"Rebate"`
+	PrevBadDebt           float64 `json:"PrevBadDebt"`
+	LastBadDebt           float64 `json:"LastBadDebt"`
+	NetProfit             float64 `json:"NetProfit"`
+	NetProfitUSD          float64 `json:"NetProfitUSD"`
+	AccountID             int64   `json:"AccountID"`
+	UserID                int64   `json:"UserID"`
+}
+
 type ReportApiResponse struct {
 	base.ApiResponse
 }

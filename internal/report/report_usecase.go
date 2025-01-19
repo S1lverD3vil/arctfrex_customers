@@ -89,16 +89,28 @@ func (ru *reportUsecase) GetActiveReportsByCode(reportCode string) (*ReportData,
 		}
 	case "R_PL":
 		{
-			// fmt.Println("R_PL")
 			reportProfitLossData, err := ru.accountRepository.GetReportProfitLoss()
-			// log.Println("data deposit")
-			//log.Println(*deposits)
-			// if deposits == nil || err != nil {
 			if len(*reportProfitLossData) == 0 {
 				reportData.Data = []interface{}{}
 				return &reportData, err
 			}
 
+			var columns []string
+			// var items []account.ReportProfitLossData
+			// items = append(items, *reportProfitLossData...)
+
+			// Create an instance of the struct
+			p := account.ReportProfitLossData{}
+
+			// Get the type of the struct
+			typ := reflect.TypeOf(p)
+
+			// Iterate over the fields
+			for i := 0; i < typ.NumField(); i++ {
+				columns = append(columns, typ.Field(i).Name)
+			}
+
+			reportData.Column = columns
 			reportData.Data = reportProfitLossData
 		}
 	default:
