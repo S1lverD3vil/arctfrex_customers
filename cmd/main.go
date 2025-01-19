@@ -192,7 +192,7 @@ func main() {
 
 	reportApiClient := report.NewReportApiClient()
 	reportRepository := report.NewReportRepository(db)
-	reportUsecase := report.NewReportUsecase(reportRepository, backofficeDepositRepository, reportApiClient)
+	reportUsecase := report.NewReportUsecase(reportRepository, accountRepository, backofficeDepositRepository, reportApiClient)
 	report.NewReportHandler(engine, jwtMiddleware, reportUsecase)
 
 	inboxRepository := inbox.NewInboxRepository(db)

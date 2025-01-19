@@ -87,6 +87,30 @@ type DemoAccountTopUp struct {
 	Result string  `json:"result"`
 }
 
+type ReportProfitLossData struct {
+	MetaLoginID           int64   `json:"meta_login_id"`
+	Name                  string  `json:"name"`
+	DomCity               string  `json:"dom_city"`
+	Currency              string  `json:"currency"`
+	CurrencyRate          float64 `json:"currency_rate"`
+	TotalDepositAmount    float64 `json:"total_deposit_amount"`
+	TotalWithdrawalAmount float64 `json:"total_withdrawal_amount"`
+	PrevEquity            float64 `json:"prev_equity"`
+	Nmii                  float64 `json:"nmii"`
+	LastEquity            float64 `json:"last_equity"`
+	GrossProfit           float64 `json:"gross_profit"`
+	GrossProfitUSD        float64 `json:"gross_profit_usd"`
+	SingleSideLot         float64 `json:"single_side_lot"`
+	Commission            float64 `json:"commission"`
+	Rebate                float64 `json:"rebate"`
+	PrevBadDebt           float64 `json:"prev_bad_debt"`
+	LastBadDebt           float64 `json:"last_bad_debt"`
+	NetProfit             float64 `json:"net_profit"`
+	NetProfitUSD          float64 `json:"net_profit_usd"`
+	AccountID             int64   `json:"accountid"`
+	UserID                int64   `json:"userid"`
+}
+
 type AccountRepository interface {
 	Create(account *Account) error
 	GetPendingAccountByUserId(userId string) (*Account, error)
@@ -99,6 +123,7 @@ type AccountRepository interface {
 	GetBackOfficePendingAccountUserData(userid string) (*AccountUserData, error)
 	GetBackOfficePendingAccounts() (*[]BackOfficePendingAccount, error)
 	GetBackOfficeAllAccounts() (*[]BackOfficeAllAccount, error)
+	GetReportProfitLoss() (*[]ReportProfitLossData, error)
 	UpdateAccount(account *Account) error
 	UpdateAccountApprovalStatus(account *Account) error
 	UpdateRealAccountCallRecording(account *Account) error

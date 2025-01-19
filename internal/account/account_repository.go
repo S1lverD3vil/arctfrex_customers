@@ -181,6 +181,51 @@ func (ar *accountRepository) GetBackOfficeAllAccounts() (*[]BackOfficeAllAccount
 	return &backOfficeAllAccounts, nil
 }
 
+func (ar *accountRepository) GetReportProfitLoss() (*[]ReportProfitLossData, error) {
+	var reportProfitLossData []ReportProfitLossData
+	if err := ar.db.Table("accounts").
+		Joins("JOIN users ON users.id = accounts.user_id").
+		Joins("JOIN user_addresses ua ON ua.id = users.id").
+		Joins("JOIN user_finances uf ON uf.id = users.id").
+		Joins("LEFT JOIN (SELECT account_id, user_id, SUM(amount) AS total_amount FROM deposits GROUP BY account_id, user_id) total_deposit ON total_deposit.account_id = accounts.id AND total_deposit.user_id = users.id").
+		Joins("LEFT JOIN (SELECT account_id, user_id, SUM(amount) AS total_amount FROM withdrawals GROUP BY account_id, user_id) total_withdrawal ON total_withdrawal.account_id = accounts.id AND total_withdrawal.user_id = users.id").
+		Select(`
+			accounts.meta_login_id,
+			users.name,
+			ua.dom_city,
+			uf.currency,
+			uf.currency_rate,
+			COALESCE(total_deposit.total_amount, 0) AS total_deposit_amount,
+			COALESCE(total_withdrawal.total_amount, 0) AS total_withdrawal_amount,
+			COALESCE(total_deposit.total_amount, 0) - COALESCE(total_withdrawal.total_amount, 0) AS prev_equity,
+			COALESCE(total_deposit.total_amount, 0) - COALESCE(total_withdrawal.total_amount, 0) AS nmii,
+			accounts.equity AS last_equity,
+			accounts.equity - 0 AS gross_profit,
+			accounts.equity - 0 AS gross_profit_usd,
+			0 AS single_side_lot,
+			0 AS commission,
+			0 AS rebate,
+			0 AS prev_bad_debt,
+			0 AS last_bad_debt,
+			accounts.equity - 0 AS net_profit,
+			accounts.equity - 0 AS net_profit_usd,
+			accounts.id AS accountid,
+			users.id AS userid
+		`).
+		Where(`
+			accounts.type = ?
+			and users.mobile_phone = ?`,
+			enums.AccountTypeReal,
+			"812982951181",
+		).
+		Scan(&reportProfitLossData).Error; err != nil {
+
+		return nil, err
+	}
+
+	return &reportProfitLossData, nil
+}
+
 func (ar *accountRepository) UpdateAccount(account *Account) error {
 	return ar.db.Updates(account).Error
 }

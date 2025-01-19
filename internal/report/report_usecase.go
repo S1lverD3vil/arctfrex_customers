@@ -1,6 +1,7 @@
 package report
 
 import (
+	"arctfrex-customers/internal/account"
 	"arctfrex-customers/internal/deposit"
 	"fmt"
 	"reflect"
@@ -13,17 +14,20 @@ type ReportUsecase interface {
 
 type reportUsecase struct {
 	reportRepository  ReportRepository
+	accountRepository account.AccountRepository
 	depositRepository deposit.DepositRepository
 	reportApiClient   ReportApiClient
 }
 
 func NewReportUsecase(
 	rr ReportRepository,
+	ar account.AccountRepository,
 	dr deposit.DepositRepository,
 	rac ReportApiClient,
 ) *reportUsecase {
 	return &reportUsecase{
 		reportRepository:  rr,
+		accountRepository: ar,
 		depositRepository: dr,
 		reportApiClient:   rac,
 	}
@@ -82,6 +86,20 @@ func (ru *reportUsecase) GetActiveReportsByCode(reportCode string) (*ReportData,
 
 			reportData.Column = columns
 			reportData.Data = items
+		}
+	case "R_PL":
+		{
+			// fmt.Println("R_PL")
+			reportProfitLossData, err := ru.accountRepository.GetReportProfitLoss()
+			// log.Println("data deposit")
+			//log.Println(*deposits)
+			// if deposits == nil || err != nil {
+			if len(*reportProfitLossData) == 0 {
+				reportData.Data = []interface{}{}
+				return &reportData, err
+			}
+
+			reportData.Data = reportProfitLossData
 		}
 	default:
 		{
