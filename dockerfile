@@ -1,5 +1,5 @@
 # Use a lightweight base image
-FROM golang:1.22.4-alpine
+FROM golang:1.23.0-alpine
 
 # Set environment variables
 ENV GO111MODULE=on \
