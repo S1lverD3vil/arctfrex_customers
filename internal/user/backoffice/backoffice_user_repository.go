@@ -47,3 +47,39 @@ func (bur *backofficeUserRepository) GetActiveUsers() (*[]BackofficeUsers, error
 func (bur *backofficeUserRepository) Update(user *BackofficeUsers) error {
 	return bur.db.Updates(user).Error
 }
+
+func (bur *backofficeUserRepository) GetActiveUsersByRoleId(roleId string) ([]BackofficeUsers, error) {
+	var backofficeUsers []BackofficeUsers
+
+	queryParams := BackofficeUsers{
+		RoleId: roleId,
+		BaseModel: base.BaseModel{
+			IsActive: true,
+		},
+	}
+
+	err := bur.db.Find(&backofficeUsers, &queryParams).Error
+	if err != nil || backofficeUsers == nil {
+		return nil, err
+	}
+
+	return backofficeUsers, nil
+}
+
+func (bur *backofficeUserRepository) GetActiveSubordinate(userId string) (*[]BackofficeUsers, error) {
+	var backofficeUsers []BackofficeUsers
+
+	queryParams := BackofficeUsers{
+		SuperiorId: userId,
+		BaseModel: base.BaseModel{
+			IsActive: true,
+		},
+	}
+
+	err := bur.db.Find(&backofficeUsers, &queryParams).Error
+	if err != nil || backofficeUsers == nil {
+		return nil, err
+	}
+
+	return &backofficeUsers, nil
+}

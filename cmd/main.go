@@ -15,6 +15,7 @@ import (
 	"arctfrex-customers/internal/order"
 	"arctfrex-customers/internal/otp"
 	"arctfrex-customers/internal/report"
+	"arctfrex-customers/internal/role"
 	"arctfrex-customers/internal/storage"
 	user_backoffice "arctfrex-customers/internal/user/backoffice"
 	user_mobile "arctfrex-customers/internal/user/mobile"
@@ -108,7 +109,7 @@ func main() {
 	// Worker to fetch market price every minute
 	marketPriceWorker := market.NewMarketWorker(marketUsecase)
 	if runMarketWorkerPriceUpdates {
-		marketPriceWorker.PriceUpdates(500 * time.Millisecond)
+		marketPriceWorker.PriceUpdates(1 * time.Second)
 	}
 	if runMarketWorkerLiveMarketUpdates {
 		marketPriceWorker.LiveMarketUpdates(3 * time.Second)
@@ -169,6 +170,11 @@ func main() {
 		orderWorker.CloseAllExpiredOrder(5 * time.Minute)
 	}
 
+	// Role
+	roleRepository := role.NewRoleRepository(db)
+	roleUseCase := role.NewRoleUseCase(roleRepository)
+	role.NewRoleHandler(engine, jwtMiddleware, roleUseCase)
+
 	//Backoffice user
 	backofficeUserRepository := user_backoffice.NewBackofficeUserRepository(db)
 	backofficeUserUsecase := user_backoffice.NewBackofficeUsecase(backofficeUserRepository, jwtService)
@@ -194,6 +200,8 @@ func main() {
 	reportRepository := report.NewReportRepository(db)
 	reportUsecase := report.NewReportUsecase(reportRepository, accountRepository, backofficeDepositRepository, reportApiClient)
 	report.NewReportHandler(engine, jwtMiddleware, reportUsecase)
+	reportWorker := report.NewReportWorker(reportUsecase)
+	reportWorker.GroupUserLoginsUpdates(5 * time.Second)
 
 	inboxRepository := inbox.NewInboxRepository(db)
 	inboxUsecase := inbox.NewInboxUseCase(inboxRepository)

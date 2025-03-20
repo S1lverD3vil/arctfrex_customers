@@ -4,6 +4,7 @@ import (
 	"arctfrex-customers/internal/base"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type reportRepository struct {
@@ -26,4 +27,16 @@ func (rr *reportRepository) GetActiveReports() (*[]Report, error) {
 	}
 
 	return &reports, nil
+}
+
+func (rr *reportRepository) SaveGroupUserLogins(reportGroupUserLogins []ReportGroupUserLogins) error {
+	// return rr.db.Save(reportGroupUserLogins).Error
+	if len(reportGroupUserLogins) == 0 {
+		return nil // No data to insert
+	}
+
+	// Use ON CONFLICT DO NOTHING to skip duplicates
+	result := rr.db.Clauses(clause.OnConflict{DoNothing: true}).Create(&reportGroupUserLogins)
+
+	return result.Error
 }

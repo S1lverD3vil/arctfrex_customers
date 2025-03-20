@@ -2,6 +2,7 @@ package report
 
 import (
 	"arctfrex-customers/internal/account"
+	"arctfrex-customers/internal/base"
 	"arctfrex-customers/internal/deposit"
 	"fmt"
 	"reflect"
@@ -10,6 +11,7 @@ import (
 type ReportUsecase interface {
 	GetActiveReports() (*[]Report, error)
 	GetActiveReportsByCode(reportCode string) (*ReportData, error)
+	GroupUserLoginsUpdates() error
 }
 
 type reportUsecase struct {
@@ -143,6 +145,21 @@ func (ru *reportUsecase) GetActiveReportsByCode(reportCode string) (*ReportData,
 	return &reportData, nil
 }
 
+func (ru *reportUsecase) GroupUserLoginsUpdates() error {
+
+	groupUserLoginsUpdates, err := ru.reportApiClient.GetGroupUserLogins(GroupUserLoginsRequest{GroupName: "demo\\PKB\\B-USD-SFL15-MAR-C50-SWAP"})
+
+	if err != nil {
+		return err
+	}
+
+	if err := ru.reportRepository.SaveGroupUserLogins(ConvertResponseToReport(*groupUserLoginsUpdates)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func mapToResponse(data account.ReportProfitLossData) ReportProfitLossDataResponse {
 	return ReportProfitLossDataResponse{
 		MetaLoginID:           data.MetaLoginID,
@@ -167,4 +184,13 @@ func mapToResponse(data account.ReportProfitLossData) ReportProfitLossDataRespon
 		AccountID:             data.AccountID,
 		UserID:                data.UserID,
 	}
+}
+
+func ConvertResponseToReport(response GroupUserLoginsResponse) []ReportGroupUserLogins {
+	// Use slices.Map to transform data slice to []ReportGroupUserLogins
+	var result []ReportGroupUserLogins
+	for _, id := range response.Data {
+		result = append(result, ReportGroupUserLogins{Login: id, BaseModel: base.BaseModel{IsActive: true}})
+	}
+	return result
 }

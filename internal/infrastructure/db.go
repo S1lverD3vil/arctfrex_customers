@@ -11,6 +11,7 @@ import (
 	"arctfrex-customers/internal/order"
 	"arctfrex-customers/internal/otp"
 	"arctfrex-customers/internal/report"
+	"arctfrex-customers/internal/role"
 	backoffice "arctfrex-customers/internal/user/backoffice"
 	mobile "arctfrex-customers/internal/user/mobile"
 	"arctfrex-customers/internal/withdrawal"
@@ -79,8 +80,12 @@ func NewDB() *gorm.DB {
 		&report.ReportOrders{},
 		&report.ReportHistoryOrders{},
 		&report.ReportDealData{},
+		&report.ReportGroupUserLogins{},
 		&inbox.Inbox{},
+		&role.Role{},
 	)
+
+	role.CreateRoleSeed(db)
 
 	return db
 }

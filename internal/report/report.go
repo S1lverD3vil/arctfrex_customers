@@ -51,6 +51,12 @@ type ReportOrders struct {
 	base.BaseModel
 }
 
+type ReportGroupUserLogins struct {
+	Login int64 `gorm:"primary_key" json:"Login"` // Maps to "Login" field
+
+	base.BaseModel
+}
+
 type ReportHistoryOrders struct {
 	OrderID          int64   `json:"Order" gorm:"column:order_id;primaryKey"`
 	ExternalID       string  `json:"ExternalID" gorm:"column:external_id"`
@@ -187,10 +193,18 @@ type ReportProfitLossDataResponse struct {
 	UserID                int64   `json:"UserID"`
 }
 
+type GroupUserLoginsRequest struct {
+	GroupName string `json:"GroupName"`
+}
+type GroupUserLoginsResponse struct {
+	Data []int64 `json:"data"`
+}
+
 type ReportApiResponse struct {
 	base.ApiResponse
 }
 
 type ReportRepository interface {
 	GetActiveReports() (*[]Report, error)
+	SaveGroupUserLogins(reportGroupUserLogins []ReportGroupUserLogins) error
 }

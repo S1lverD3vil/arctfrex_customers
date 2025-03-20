@@ -16,6 +16,8 @@ type BackofficeUserUsecase interface {
 	Register(backofficeUser *BackofficeUsers) error
 	LoginSession(backofficeUser *BackofficeUsers) (*BackofficeUserLoginSessionResponse, error)
 	All() (*[]BackofficeUsers, error)
+	AllUsersByRoleId(roleId string) ([]BackofficeUsers, error)
+	Subordinate(userId string) (*[]BackofficeUsers, error)
 }
 
 type backofficeUserUsecase struct {
@@ -34,7 +36,6 @@ func NewBackofficeUsecase(
 }
 
 func (buu *backofficeUserUsecase) Register(backofficeUser *BackofficeUsers) error {
-
 	userdb, _ := buu.backofficeUserRepository.GetUserByEmail(backofficeUser.Email)
 	if userdb != nil {
 		return errors.New("email or phone number already used")
@@ -51,7 +52,6 @@ func (buu *backofficeUserUsecase) Register(backofficeUser *BackofficeUsers) erro
 	}
 
 	backofficeUser.ID = strings.ReplaceAll(newUUID.String(), "-", "")
-	backofficeUser.RoleId = backofficeUser.RoleIdType.String()
 	backofficeUser.Password = string(hashedPassword)
 	backofficeUser.ReferralCode = common.GenerateShortKSUID()
 	backofficeUser.IsActive = true
@@ -101,5 +101,22 @@ func (buh *backofficeUserUsecase) All() (*[]BackofficeUsers, error) {
 	}
 
 	return userdb, nil
+}
 
+func (buh *backofficeUserUsecase) AllUsersByRoleId(roleId string) ([]BackofficeUsers, error) {
+	userdb, err := buh.backofficeUserRepository.GetActiveUsersByRoleId(roleId)
+	if err != nil {
+		return nil, err
+	}
+
+	return userdb, nil
+}
+
+func (buh *backofficeUserUsecase) Subordinate(userId string) (*[]BackofficeUsers, error) {
+	userdb, err := buh.backofficeUserRepository.GetActiveSubordinate(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	return userdb, nil
 }

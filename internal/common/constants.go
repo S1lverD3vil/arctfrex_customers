@@ -15,6 +15,7 @@ const (
 	JWT_SECRET_KEY                               = "JWT_SECRET_KEY"
 	APPLICATION_NAME                             = "APPLICATION_NAME"
 	HTTP_METHOD_GET                              = "GET"
+	HTTP_METHOD_POST                             = "POST"
 	OTP_GENERATOR_SECRET                         = "OTP_GENERATOR_SECRET"
 	EMAIL_FROM                                   = "EMAIL_FROM"
 	OTP_EMAIL_SUBJECT                            = "OTP_EMAIL_SUBJECT"

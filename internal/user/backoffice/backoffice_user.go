@@ -3,6 +3,7 @@ package user
 import (
 	"arctfrex-customers/internal/base"
 	"arctfrex-customers/internal/common/enums"
+	"arctfrex-customers/internal/role"
 
 	"gorm.io/gorm"
 )
@@ -20,6 +21,9 @@ type BackofficeUsers struct {
 	SuperiorId   string                `json:"superior_id"`
 	ReferralCode string                `gorm:"unique" json:"referral_code"`
 	JobPosition  enums.JobPositionType `json:"job_position"`
+
+	Role     role.Role        `gorm:"foreignKey:RoleId"`
+	Superior *BackofficeUsers `gorm:"foreignKey:SuperiorId"`
 
 	base.BaseModel
 }
@@ -53,4 +57,6 @@ type BackofficeUserRepository interface {
 	GetUserByEmail(email string) (*BackofficeUsers, error)
 	GetActiveUsers() (*[]BackofficeUsers, error)
 	Update(user *BackofficeUsers) error
+	GetActiveSubordinate(userId string) (*[]BackofficeUsers, error)
+	GetActiveUsersByRoleId(roleId string) ([]BackofficeUsers, error)
 }
