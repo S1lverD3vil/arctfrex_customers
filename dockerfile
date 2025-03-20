@@ -35,13 +35,13 @@ ENV GO111MODULE=on \
     RUN_NEWS_WORKER_LATEST_NEWS_UPDATES=false \
     RUN_NEWS_WORKER_LATEST_NEWS_BULLETIN_UPDATES=false \
     RUN_ORDER_WORKER_CLOSE_ALL_EXPIRED_ORDER=false \
-    MINIO_ENDPOINT=storage.arctfrex.com \
-    MINIO_BASEURL=storage.arctfrex.com \
+    MINIO_ENDPOINT=dev-storage.arctfrex.com \
+    MINIO_BASEURL=dev-storage.arctfrex.com \
     MINIO_ENDPOINT_SECURED=true \
     MINIO_ACCESS_KEY=riFjlIyURmjokSIgNWej \ 
     MINIO_SECRET_KEY=7aba7M3oLAwkZaQaMz3V5MN0CkYQtwdtIauQzxMQ \
     BUCKET_NAME=arctfrex \
-    ARC_META_INTEGRATOR_BASEURL=https://arcmetaintegrator.arctfrex.com/api
+    ARC_META_INTEGRATOR_BASEURL=https://dev-arcmetaintegrator.arctfrex.com/api
 
 # Set the working directory
 WORKDIR /app
