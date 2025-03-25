@@ -7,9 +7,9 @@ import (
 )
 
 type Role struct {
-	ID             string  `json:"id" gorm:"primary_key"`
+	ID             string  `json:"id" gorm:"primaryKey"`
 	Name           string  `json:"name"`
-	CommissionRate float64 `json:"commission_rate" gorm:"default:null"`
+	CommissionRate float64 `json:"commission_rate" gorm:"type:double"`
 	ParentRoleID   *string `json:"parent_role_id"`
 
 	ParentRole *Role `gorm:"foreignKey:ParentRoleID"`
@@ -20,7 +20,7 @@ type Role struct {
 type CreateUserDTO struct {
 	ID             string  `json:"id" binding:"required"`
 	Name           string  `json:"name" binding:"required"`
-	CommissionRate float64 `json:"commission_rate" `
+	CommissionRate float64 `json:"commission_rate"`
 	ParentRoleID   *string `json:"parent_role_id"`
 }
 
@@ -64,4 +64,7 @@ type RoleApiResponse struct {
 type RoleRepository interface {
 	GetActiveRoles() ([]Role, error)
 	Create(role *Role) error
+	Update(role *Role) error
+	Delete(roleID string) error
+	GetByID(roleID string) (*Role, error)
 }

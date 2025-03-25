@@ -73,7 +73,7 @@ func main() {
 
 	// Use CORS middleware
 	engine.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000", "https://panen.vercel.app", "https://admin.panenkapital.com", "https://dev-admin.panenkapital.com"},
+		AllowOrigins:     []string{"http://localhost:3000", "https://panen.vercel.app", "https://admin.panenkapital.com"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},

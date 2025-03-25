@@ -123,7 +123,7 @@ type AccountRepository interface {
 	GetBackOfficePendingAccountUserData(userid string) (*AccountUserData, error)
 	GetBackOfficePendingAccounts() (*[]BackOfficePendingAccount, error)
 	GetBackOfficeAllAccounts() (*[]BackOfficeAllAccount, error)
-	GetReportProfitLoss() (*[]ReportProfitLossData, error)
+	GetReportProfitLoss(startDate, endDate string) (*[]ReportProfitLossData, error)
 	UpdateAccount(account *Account) error
 	UpdateAccountApprovalStatus(account *Account) error
 	UpdateRealAccountCallRecording(account *Account) error

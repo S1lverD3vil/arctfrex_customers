@@ -31,6 +31,22 @@ func (rr *roleRepository) GetActiveRoles() ([]Role, error) {
 	return roles, nil
 }
 
+func (rr *roleRepository) GetByID(roleID string) (*Role, error) {
+	queryParams := Role{
+		ID: roleID,
+		BaseModel: base.BaseModel{
+			IsActive: true,
+		},
+	}
+
+	var role Role
+	err := rr.db.Where(queryParams).First(&role).Error
+	if err != nil {
+		return nil, err
+	}
+	return &role, nil
+}
+
 func (rr *roleRepository) Create(role *Role) error {
 	role.IsActive = true
 
@@ -39,4 +55,19 @@ func (rr *roleRepository) Create(role *Role) error {
 	}
 
 	return nil
+}
+
+func (rr *roleRepository) Update(role *Role) error {
+	return rr.db.Where("id = ?", role.ID).Updates(role).Error
+
+}
+
+func (rr *roleRepository) Delete(roleID string) error {
+	role, err := rr.GetByID(roleID)
+	if err != nil {
+		return err
+	}
+
+	return rr.db.Model(&Role{}).Where("id = ?", role.ID).Update("is_active", false).Error
+
 }

@@ -10,6 +10,7 @@ import (
 
 type ReportUsecase interface {
 	GetActiveReports() (*[]Report, error)
+	GetActiveReportsByCode(reportCode, startDate, endDate string) (*ReportData, error)
 	GetActiveReportsByCode(reportCode string) (*ReportData, error)
 	GroupUserLoginsUpdates() error
 }
@@ -44,7 +45,7 @@ func (ru *reportUsecase) GetActiveReports() (*[]Report, error) {
 	return reports, nil
 }
 
-func (ru *reportUsecase) GetActiveReportsByCode(reportCode string) (*ReportData, error) {
+func (ru *reportUsecase) GetActiveReportsByCode(reportCode, startDate, endDate string) (*ReportData, error) {
 	reportData := ReportData{
 		Code: reportCode,
 	}
@@ -53,9 +54,6 @@ func (ru *reportUsecase) GetActiveReportsByCode(reportCode string) (*ReportData,
 	case "R_DT":
 		{
 			deposits, err := ru.depositRepository.GetBackOfficePendingDeposits()
-			// log.Println("data deposit")
-			//log.Println(*deposits)
-			// if deposits == nil || err != nil {
 			if len(*deposits) == 0 {
 				reportData.Data = []interface{}{}
 				return &reportData, err
@@ -71,64 +69,51 @@ func (ru *reportUsecase) GetActiveReportsByCode(reportCode string) (*ReportData,
 				return &ReportData{}, err
 			}
 
-			var columns []string
-			var items []AccountGetManifestResponse
-			items = append(items, *accountGetManifestResponse)
-
-			// Create an instance of the struct
-			p := AccountGetManifestResponse{}
+			reportData.Data = []interface{}{*accountGetManifestResponse}
 
 			// Get the type of the struct
-			typ := reflect.TypeOf(p)
+			typ := reflect.TypeOf(AccountGetManifestResponse{})
 
 			// Iterate over the fields
+			var columns []string
 			for i := 0; i < typ.NumField(); i++ {
 				columns = append(columns, typ.Field(i).Name)
 			}
-
 			reportData.Column = columns
-			reportData.Data = items
 		}
 	case "R_PL":
 		{
-			reportProfitLossData, err := ru.accountRepository.GetReportProfitLoss()
+			reportProfitLossData, err := ru.accountRepository.GetReportProfitLoss(startDate, endDate)
 			if len(*reportProfitLossData) == 0 {
 				reportData.Data = []interface{}{}
 				return &reportData, err
 			}
 
 			var columns []string
-			// var items []account.ReportProfitLossData
-			// items = append(items, *reportProfitLossData...)
-
-			// Create an instance of the struct
-			p := account.ReportProfitLossData{}
-
-			// Get the type of the struct
-			typ := reflect.TypeOf(p)
-
-			// Iterate over the fields
+			typ := reflect.TypeOf(account.ReportProfitLossData{})
 			for i := 0; i < typ.NumField(); i++ {
 				columns = append(columns, typ.Field(i).Name)
 			}
+
 			// Map to JSON response struct
 			response := make([]ReportProfitLossDataResponse, len(*reportProfitLossData))
 			for i, data := range *reportProfitLossData {
 				response[i] = mapToResponse(data)
 			}
 
+			// Convert `response` to `[]interface{}`
+			dataInterfaces := make([]interface{}, len(response))
+			for i, v := range response {
+				dataInterfaces[i] = v
+			}
+
 			reportData.Column = columns
-			reportData.Data = response
+			reportData.Data = dataInterfaces
 		}
 	default:
 		{
 			deposits, err := ru.depositRepository.GetBackOfficePendingDeposits()
-			// log.Println("default data deposit")
-			// log.Println(deposits)
-			// if deposits == nil || err != nil {
-			// 	reportData.Data = []string{}
-			// 	return &reportData, err
-			// }
+
 			if len(*deposits) == 0 {
 				reportData.Data = []interface{}{}
 				return &reportData, err
@@ -137,10 +122,6 @@ func (ru *reportUsecase) GetActiveReportsByCode(reportCode string) (*ReportData,
 			reportData.Data = deposits
 		}
 	}
-	//reports, err := ru.reportRepository.GetActiveReports()
-	// if err != nil {
-	// 	return &ReportData{}, err
-	// }
 
 	return &reportData, nil
 }

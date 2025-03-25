@@ -181,9 +181,9 @@ func (ar *accountRepository) GetBackOfficeAllAccounts() (*[]BackOfficeAllAccount
 	return &backOfficeAllAccounts, nil
 }
 
-func (ar *accountRepository) GetReportProfitLoss() (*[]ReportProfitLossData, error) {
+func (ar *accountRepository) GetReportProfitLoss(startDate, endDate string) (*[]ReportProfitLossData, error) {
 	var reportProfitLossData []ReportProfitLossData
-	if err := ar.db.Table("accounts").
+	query := ar.db.Table("accounts").
 		Joins("JOIN users ON users.id = accounts.user_id").
 		Joins("JOIN user_addresses ua ON ua.id = users.id").
 		Joins("JOIN user_finances uf ON uf.id = users.id").
@@ -217,9 +217,14 @@ func (ar *accountRepository) GetReportProfitLoss() (*[]ReportProfitLossData, err
 			and users.mobile_phone = ?`,
 			enums.AccountTypeReal,
 			"812982951181",
-		).
-		Scan(&reportProfitLossData).Error; err != nil {
+		)
 
+	if startDate != "" && endDate != "" {
+		query = query.Where("accounts.created_at BETWEEN ? AND ?", startDate, endDate)
+
+	}
+
+	if err := query.Scan(&reportProfitLossData).Error; err != nil {
 		return nil, err
 	}
 
