@@ -11,7 +11,6 @@ import (
 type ReportUsecase interface {
 	GetActiveReports() (*[]Report, error)
 	GetActiveReportsByCode(reportCode, startDate, endDate string) (*ReportData, error)
-	GetActiveReportsByCode(reportCode string) (*ReportData, error)
 	GroupUserLoginsUpdates() error
 }
 
