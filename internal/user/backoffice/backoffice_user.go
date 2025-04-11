@@ -3,6 +3,7 @@ package user
 import (
 	"arctfrex-customers/internal/base"
 	"arctfrex-customers/internal/common/enums"
+	"arctfrex-customers/internal/grouprole"
 	"arctfrex-customers/internal/role"
 
 	"gorm.io/gorm"
@@ -17,13 +18,15 @@ type BackofficeUsers struct {
 	DeviceId     string                `json:"device_id"`
 	SessionId    string                `json:"session_id"`
 	RoleIdType   enums.RoleIdType      `json:"role_id_type"`
+	GroupRoleId  string                `json:"group_role_id"`
 	RoleId       string                `json:"role_id"`
 	SuperiorId   string                `json:"superior_id"`
 	ReferralCode string                `gorm:"unique" json:"referral_code"`
 	JobPosition  enums.JobPositionType `json:"job_position"`
 
-	Role     role.Role        `gorm:"foreignKey:RoleId"`
-	Superior *BackofficeUsers `gorm:"foreignKey:SuperiorId"`
+	GroupRole grouprole.GroupRole `gorm:"foreignKey:GroupRoleId"`
+	Role      role.Role           `gorm:"foreignKey:RoleId"`
+	Superior  *BackofficeUsers    `gorm:"foreignKey:SuperiorId"`
 
 	base.BaseModel
 }

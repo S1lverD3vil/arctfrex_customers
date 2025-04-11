@@ -5,6 +5,7 @@ import (
 	"arctfrex-customers/internal/common"
 	"arctfrex-customers/internal/conversation"
 	"arctfrex-customers/internal/deposit"
+	"arctfrex-customers/internal/grouprole"
 	"arctfrex-customers/internal/inbox"
 	"arctfrex-customers/internal/market"
 	"arctfrex-customers/internal/news"
@@ -82,10 +83,12 @@ func NewDB() *gorm.DB {
 		&report.ReportDealData{},
 		&report.ReportGroupUserLogins{},
 		&inbox.Inbox{},
+		&grouprole.GroupRole{},
 		&role.Role{},
 	)
 
-	role.CreateRoleSeed(db)
+	grouprole.SeedGroupRoles(db) // Seed Role Groups dulu
+	role.SeedRoles(db)           // Setelah itu, baru Seed Roles
 
 	return db
 }

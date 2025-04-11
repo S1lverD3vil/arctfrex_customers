@@ -2,6 +2,8 @@ package role
 
 import (
 	"arctfrex-customers/internal/base"
+	"arctfrex-customers/internal/grouprole"
+	"strings"
 
 	"gorm.io/gorm"
 )
@@ -9,10 +11,12 @@ import (
 type Role struct {
 	ID             string  `json:"id" gorm:"primaryKey"`
 	Name           string  `json:"name"`
-	CommissionRate float64 `json:"commission_rate" gorm:"type:double"`
+	CommissionRate float64 `json:"commission_rate" gorm:"type:double precision"`
 	ParentRoleID   *string `json:"parent_role_id"`
+	GroupRoleID    string  `json:"role_group_id"`
 
-	ParentRole *Role `gorm:"foreignKey:ParentRoleID"`
+	ParentRole *Role               `gorm:"foreignKey:ParentRoleID"`
+	GroupRole  grouprole.GroupRole `gorm:"foreignKey:GroupRoleID"`
 
 	base.BaseModel
 }
@@ -24,41 +28,33 @@ type CreateUserDTO struct {
 	ParentRoleID   *string `json:"parent_role_id"`
 }
 
-func CreateRoleSeed(db *gorm.DB) {
-	roles := []Role{
-		{ID: "HM", Name: "Head of Marketing", CommissionRate: 0.01, BaseModel: base.BaseModel{
-			IsActive: true,
-		}},
-		{ID: "SBM", Name: "Senior Business Manager", CommissionRate: 0.02, ParentRoleID: strPtr("HM"), BaseModel: base.BaseModel{
-			IsActive: true,
-		}},
-		{ID: "BM", Name: "Business Manager", CommissionRate: 0.03, ParentRoleID: strPtr("SBM"), BaseModel: base.BaseModel{
-			IsActive: true,
-		}},
-		{ID: "ABM", Name: "Assistant Business Manager", CommissionRate: 0.05, ParentRoleID: strPtr("BM"), BaseModel: base.BaseModel{
-			IsActive: true,
-		}},
-		{ID: "MKT", Name: "Marketing", CommissionRate: 0.07, ParentRoleID: strPtr("ABM"), BaseModel: base.BaseModel{
-			IsActive: true,
-		}},
-		{ID: "IB", Name: "Freelance", CommissionRate: 0.10, ParentRoleID: strPtr("MKT"), BaseModel: base.BaseModel{
-			IsActive: true,
-		}},
-	}
-
-	for _, role := range roles {
-		db.FirstOrCreate(&role, Role{ID: role.ID})
-	}
-}
-
-func strPtr(s string) *string {
-	return &s
-}
-
 type RoleApiResponse struct {
 	Message string `json:"message"`
 	Data    any    `json:"data"`
 	Time    string `json:"time"`
+}
+
+// BeforeCreate memastikan ID diformat sebelum disimpan
+func (r *Role) BeforeCreate(tx *gorm.DB) (err error) {
+	r.ID = formatRoleID(r.ID)
+	return
+}
+
+// BeforeUpdate memastikan ID tidak bisa diubah setelah dibuat
+func (r *Role) BeforeUpdate(tx *gorm.DB) (err error) {
+	var existing Role
+	if err := tx.First(&existing, "id = ?", r.ID).Error; err == nil {
+		// Jika ID sudah ada, gunakan ID lama
+		r.ID = existing.ID
+	}
+	return
+}
+
+// formatRoleID mengubah string menjadi lowercase dan mengganti spasi dengan underscore
+func formatRoleID(name string) string {
+	name = strings.ToLower(name)
+	name = strings.ReplaceAll(name, " ", "_")
+	return name
 }
 
 type RoleRepository interface {
