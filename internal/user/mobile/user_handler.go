@@ -30,10 +30,15 @@ func NewUserHandler(
 	unprotectedRoutes, protectedRoutes := engine.Group("/users"), engine.Group("/users")
 
 	unprotectedRoutesBackOffice.GET("/profile/:userid", handler.BackOfficeCustomersGetProfile)
+	unprotectedRoutesBackOffice.POST("/profile/:userid", handler.BackOfficeCustomersUpdateProfile)
 	unprotectedRoutesBackOffice.GET("/address/:userid", handler.BackOfficeCustomersGetAddress)
+	unprotectedRoutesBackOffice.POST("/address/:userid", handler.BackOfficeCustomersUpdateAddress)
 	unprotectedRoutesBackOffice.GET("/employment/:userid", handler.BackOfficeCustomersGetEmployment)
+	unprotectedRoutesBackOffice.POST("/employment/:userid", handler.BackOfficeCustomersUpdateEmployment)
 	unprotectedRoutesBackOffice.GET("/finance/:userid", handler.BackOfficeCustomersGetFinance)
+	unprotectedRoutesBackOffice.POST("/finance/:userid", handler.BackOfficeCustomersUpdateFinance)
 	unprotectedRoutesBackOffice.GET("/emergencycontact/:userid", handler.BackOfficeCustomersGetEmergencyContact)
+	unprotectedRoutesBackOffice.POST("/emergencycontact/:userid", handler.BackOfficeCustomersUpdateEmergencyContact)
 	unprotectedRoutesBackOffice.POST("/register", handler.Register)
 	unprotectedRoutesBackOffice.GET("/check/:mobilePhone", handler.Check)
 	unprotectedRoutesBackOffice.PATCH("/pin", handler.UpdatePin)
@@ -240,6 +245,21 @@ func (uh *userHandler) BackOfficeCustomersGetProfile(c *gin.Context) {
 	c.JSON(http.StatusOK, userProfile)
 }
 
+func (uh *userHandler) BackOfficeCustomersUpdateProfile(c *gin.Context) {
+	var userProfile *UserProfile
+	if err := c.ShouldBindJSON(&userProfile); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := uh.userUsecase.UpdateProfile(c.Param("userid"), userProfile); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Status(http.StatusOK)
+}
+
 func (uh *userHandler) UpdateAddress(c *gin.Context) {
 	// Retrieve the userID from context
 	userID, exists := c.Get("userID")
@@ -296,6 +316,21 @@ func (uh *userHandler) BackOfficeCustomersGetAddress(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, userAddress)
+}
+
+func (uh *userHandler) BackOfficeCustomersUpdateAddress(c *gin.Context) {
+	var userAddress *UserAddress
+	if err := c.ShouldBindJSON(&userAddress); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := uh.userUsecase.UpdateAddress(c.Param("userid"), userAddress); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Status(http.StatusOK)
 }
 
 func (uh *userHandler) UpdateEmployment(c *gin.Context) {
@@ -356,6 +391,21 @@ func (uh *userHandler) BackOfficeCustomersGetEmployment(c *gin.Context) {
 	c.JSON(http.StatusOK, userEmployment)
 }
 
+func (uh *userHandler) BackOfficeCustomersUpdateEmployment(c *gin.Context) {
+	var userEmployment *UserEmployment
+	if err := c.ShouldBindJSON(&userEmployment); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := uh.userUsecase.UpdateEmployment(c.Param("userid"), userEmployment); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Status(http.StatusOK)
+}
+
 func (uh *userHandler) UpdateFinance(c *gin.Context) {
 	// Retrieve the userID from context
 	userID, exists := c.Get("userID")
@@ -414,6 +464,21 @@ func (uh *userHandler) BackOfficeCustomersGetFinance(c *gin.Context) {
 	c.JSON(http.StatusOK, userFinance)
 }
 
+func (uh *userHandler) BackOfficeCustomersUpdateFinance(c *gin.Context) {
+	var userFinance *UserFinance
+	if err := c.ShouldBindJSON(&userFinance); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := uh.userUsecase.UpdateFinance(c.Param("userid"), userFinance); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Status(http.StatusOK)
+}
+
 func (uh *userHandler) UpdateEmergencyContact(c *gin.Context) {
 	// Retrieve the userID from context
 	userID, exists := c.Get("userID")
@@ -470,6 +535,21 @@ func (uh *userHandler) BackOfficeCustomersGetEmergencyContact(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, userEmergencyContact)
+}
+
+func (uh *userHandler) BackOfficeCustomersUpdateEmergencyContact(c *gin.Context) {
+	var userEmergencyContact *UserEmergencyContact
+	if err := c.ShouldBindJSON(&userEmergencyContact); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := uh.userUsecase.UpdateEmergencyContact(c.Param("userid"), userEmergencyContact); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Status(http.StatusOK)
 }
 
 func (uh *userHandler) BackOfficeLeads(c *gin.Context) {
