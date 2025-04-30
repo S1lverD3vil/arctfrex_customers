@@ -1,6 +1,16 @@
 package main
 
 import (
+	"log"
+	"os"
+	"path/filepath"
+	"strconv"
+	"time"
+
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+
 	"arctfrex-customers/internal/account"
 	"arctfrex-customers/internal/auth"
 	"arctfrex-customers/internal/common"
@@ -21,25 +31,21 @@ import (
 	user_mobile "arctfrex-customers/internal/user/mobile"
 	"arctfrex-customers/internal/whatsapp"
 	"arctfrex-customers/internal/withdrawal"
-	"fmt"
-	"log"
-	"os"
-	"strconv"
-	"time"
-
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
 func main() {
 
 	//Load environment variable
-	err := godotenv.Load()
+	// If not found, try loading from the parent directory (e.g., for 'cmd' folder)
+	// Get the parent directory
+	// Adjust paths for terminal usage
+	// If not in 'cmd', we are probably in a debugger or a different environment
+	// Resolve the paths dynamically based on the current working directory
+	certPath, keyPath, err := initEnv()
 	if err != nil {
-		fmt.Println("Error loading .env file")
 		return
 	}
+
 	jwtSecretKey := os.Getenv(common.JWT_SECRET_KEY)
 	applicationName := os.Getenv(common.APPLICATION_NAME)
 	runMarketWorkerPriceUpdates, err := strconv.ParseBool(os.Getenv(common.RUN_MARKET_WORKER_PRICE_UPDATES))
@@ -215,5 +221,40 @@ func main() {
 
 	//Port
 	// log.Fatal(engine.RunTLS(":8543", "certs/cert.pem", "certs/key.pem"))
-	log.Fatal(engine.RunTLS(os.Getenv(common.ENGINE_PORT), "certs/cert.pem", "certs/key.pem"))
+	log.Fatal(engine.RunTLS(os.Getenv(common.ENGINE_PORT), certPath, keyPath))
+}
+
+func initEnv() (string, string, error) {
+	certPath := "certs/cert.pem"
+	keyPath := "certs/key.pem"
+	err := godotenv.Load(".env")
+	if err != nil {
+
+		cwd, _ := os.Getwd()
+		parentDir := filepath.Dir(cwd)
+		err = godotenv.Load(filepath.Join(parentDir, ".env"))
+
+		if filepath.Base(cwd) == "cmd" {
+
+			certPath = filepath.Join(cwd, "../certs/cert.pem")
+			keyPath = filepath.Join(cwd, "../certs/key.pem")
+		} else {
+
+			certPath, err = filepath.Abs(certPath)
+			if err != nil {
+				log.Fatal("Error getting absolute cert path:", err)
+			}
+			keyPath, err = filepath.Abs(keyPath)
+			if err != nil {
+				log.Fatal("Error getting absolute key path:", err)
+			}
+		}
+	}
+
+	if err != nil {
+		log.Fatal("Error loading .env file")
+		return "", "", err
+	}
+
+	return certPath, keyPath, err
 }

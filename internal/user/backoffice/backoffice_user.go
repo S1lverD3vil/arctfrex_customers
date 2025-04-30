@@ -1,12 +1,12 @@
 package user
 
 import (
+	"gorm.io/gorm"
+
 	"arctfrex-customers/internal/base"
 	"arctfrex-customers/internal/common/enums"
 	"arctfrex-customers/internal/grouprole"
 	"arctfrex-customers/internal/role"
-
-	"gorm.io/gorm"
 )
 
 type BackofficeUsers struct {

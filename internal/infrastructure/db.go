@@ -1,6 +1,15 @@
 package infrastructure
 
 import (
+	"fmt"
+	"os"
+	"strconv"
+
+	_ "github.com/lib/pq"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+
 	"arctfrex-customers/internal/account"
 	"arctfrex-customers/internal/common"
 	"arctfrex-customers/internal/conversation"
@@ -16,14 +25,8 @@ import (
 	backoffice "arctfrex-customers/internal/user/backoffice"
 	mobile "arctfrex-customers/internal/user/mobile"
 	"arctfrex-customers/internal/withdrawal"
-	"fmt"
-	"os"
-	"strconv"
-
-	_ "github.com/lib/pq"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	"arctfrex-customers/internal/workflowapprover"
+	"arctfrex-customers/internal/workflowsetting"
 )
 
 // NewDB initializes a new database connection
@@ -55,7 +58,7 @@ func NewDB() *gorm.DB {
 	}
 
 	// Automatically migrate the schema of the User struct
-	db.AutoMigrate(
+	err = db.AutoMigrate(
 		&mobile.Users{},
 		&mobile.UserProfile{},
 		&mobile.UserAddress{},
@@ -85,7 +88,13 @@ func NewDB() *gorm.DB {
 		&inbox.Inbox{},
 		&grouprole.GroupRole{},
 		&role.Role{},
+		&workflowsetting.WorkflowSetting{},
+		&workflowapprover.WorkflowApprover{},
 	)
+
+	if err != nil {
+		fmt.Printf("failed to auto migrate: %v\n", err)
+	}
 
 	grouprole.SeedGroupRoles(db) // Seed Role Groups dulu
 	role.SeedRoles(db)           // Setelah itu, baru Seed Roles
