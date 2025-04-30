@@ -118,7 +118,7 @@ func main() {
 		marketPriceWorker.PriceUpdates(1 * time.Second)
 	}
 	if runMarketWorkerLiveMarketUpdates {
-		marketPriceWorker.LiveMarketUpdates(3 * time.Second)
+		marketPriceWorker.LiveMarketUpdates(5 * time.Second)
 	}
 	// Initialize handler
 	market.NewMarketHandler(engine, jwtMiddleware, marketUsecase)

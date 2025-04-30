@@ -5,6 +5,7 @@ import (
 	"arctfrex-customers/internal/common"
 	user_mobile "arctfrex-customers/internal/user/mobile"
 	"errors"
+	"math"
 	"sort"
 	"strings"
 )
@@ -397,7 +398,11 @@ func (mu *marketUsecase) PriceUpdates() error {
 		// forexData.ChangePercentage += changedAmount / 10
 
 		if market != nil {
-			if err := mu.marketRepository.UpdateMarket(mapForexToMarket(forexData)); err != nil {
+			marketToUpdate := mapForexToMarket(forexData)
+			marketToUpdate.DayLow = math.Min(market.DayLow, math.Min(marketToUpdate.Ask, marketToUpdate.Bid))
+			marketToUpdate.DayHigh = math.Max(market.DayHigh, math.Max(marketToUpdate.Ask, marketToUpdate.Bid))
+
+			if err := mu.marketRepository.UpdateMarket(marketToUpdate); err != nil {
 				return err
 			}
 			continue
@@ -516,8 +521,8 @@ func mapForexToMarket(forexPrice ArcMetaIntegratorPriceData) *Market {
 		Bid:           forexPrice.Bid,
 		// Change:           forexPrice.Change,
 		// ChangePercentage: forexPrice.ChangePercentage,
-		// DayLow:      forexPrice.DayLow,
-		// DayHigh:     forexPrice.DayHigh,
+		// DayLow:  forexPrice.Last,
+		// DayHigh: forexPrice.Last,
 		// YearLow:     forexPrice.YearLow,
 		// YearHigh:    forexPrice.YearHigh,
 		// Avg50Price:  forexPrice.Avg50Price,
