@@ -60,12 +60,12 @@ func (mu *marketUsecase) Price(webSocketRequest WebSocketRequest) (*[]MarketPric
 			marketCountryQuote, countryQuoteFound := getMarketCountry(marketCountries, market.QuoteCurrency)
 
 			marketPriceResponse := MarketPriceResponse{
-				Code:  market.Code,
-				Price: market.Price,
-				Ask:   market.Ask,
-				Bid:   market.Bid,
-				// Ask:              common.RoundTo4DecimalPlaces(market.Ask),
-				// Bid:              common.RoundTo4DecimalPlaces(market.Bid),
+				Code:             market.Code,
+				Price:            market.Price,
+				Ask:              market.Ask,
+				Bid:              market.Bid,
+				Low:              market.DayLow,
+				High:             market.DayHigh,
 				Change:           market.Change,
 				ChangePercentage: market.ChangePercentage,
 				IsWatchList:      market.IsWatchList,
@@ -106,6 +106,8 @@ func (mu *marketUsecase) Price(webSocketRequest WebSocketRequest) (*[]MarketPric
 					Price:            market.Price,
 					Ask:              market.Ask,
 					Bid:              market.Bid,
+					Low:              market.DayLow,
+					High:             market.DayHigh,
 					Change:           market.Change,
 					ChangePercentage: market.ChangePercentage,
 					IsWatchList:      market.IsWatchList,
@@ -147,6 +149,8 @@ func (mu *marketUsecase) Price(webSocketRequest WebSocketRequest) (*[]MarketPric
 					Price:            market.Price,
 					Ask:              market.Ask,
 					Bid:              market.Bid,
+					Low:              market.DayLow,
+					High:             market.DayHigh,
 					Change:           market.Change,
 					ChangePercentage: market.ChangePercentage,
 					IsWatchList:      market.IsWatchList,
@@ -189,6 +193,8 @@ func (mu *marketUsecase) Price(webSocketRequest WebSocketRequest) (*[]MarketPric
 					Price:            market.Price,
 					Ask:              market.Ask,
 					Bid:              market.Bid,
+					Low:              market.DayLow,
+					High:             market.DayHigh,
 					Change:           market.Change,
 					ChangePercentage: market.ChangePercentage,
 					IsWatchList:      market.IsWatchList,
@@ -230,6 +236,8 @@ func (mu *marketUsecase) Price(webSocketRequest WebSocketRequest) (*[]MarketPric
 					Price:            market.Price,
 					Ask:              market.Ask,
 					Bid:              market.Bid,
+					Low:              market.DayLow,
+					High:             market.DayHigh,
 					Change:           market.Change,
 					ChangePercentage: market.ChangePercentage,
 					IsWatchList:      market.IsWatchList,
@@ -271,6 +279,8 @@ func (mu *marketUsecase) Price(webSocketRequest WebSocketRequest) (*[]MarketPric
 					Price:            market.Price,
 					Ask:              market.Ask,
 					Bid:              market.Bid,
+					Low:              market.DayLow,
+					High:             market.DayHigh,
 					Change:           market.Change,
 					ChangePercentage: market.ChangePercentage,
 					IsWatchList:      market.IsWatchList,
@@ -312,6 +322,8 @@ func (mu *marketUsecase) Price(webSocketRequest WebSocketRequest) (*[]MarketPric
 					Price:            market.Price,
 					Ask:              market.Ask,
 					Bid:              market.Bid,
+					Low:              market.DayLow,
+					High:             market.DayHigh,
 					Change:           market.Change,
 					ChangePercentage: market.ChangePercentage,
 					IsWatchList:      market.IsWatchList,
@@ -351,8 +363,10 @@ func (mu *marketUsecase) Price(webSocketRequest WebSocketRequest) (*[]MarketPric
 				marketPriceResponse := MarketPriceResponse{
 					Code:             market.Code,
 					Price:            market.Price,
-					Ask:              common.RoundTo4DecimalPlaces(market.Ask),
-					Bid:              common.RoundTo4DecimalPlaces(market.Bid),
+					Ask:              market.Ask,
+					Bid:              market.Bid,
+					Low:              market.DayLow,
+					High:             market.DayHigh,
 					Change:           market.Change,
 					ChangePercentage: market.ChangePercentage,
 					IsWatchList:      market.IsWatchList,
@@ -399,8 +413,10 @@ func (mu *marketUsecase) PriceUpdates() error {
 
 		if market != nil {
 			marketToUpdate := mapForexToMarket(forexData)
-			marketToUpdate.DayLow = math.Min(market.DayLow, math.Min(marketToUpdate.Ask, marketToUpdate.Bid))
-			marketToUpdate.DayHigh = math.Max(market.DayHigh, math.Max(marketToUpdate.Ask, marketToUpdate.Bid))
+			marketToUpdate.DayHigh = math.Max(market.DayHigh, marketToUpdate.DayHigh)
+			if market.DayLow > 0 {
+				marketToUpdate.DayLow = math.Min(market.DayLow, marketToUpdate.DayLow)
+			}
 
 			if err := mu.marketRepository.UpdateMarket(marketToUpdate); err != nil {
 				return err
@@ -519,15 +535,9 @@ func mapForexToMarket(forexPrice ArcMetaIntegratorPriceData) *Market {
 		Price:         forexPrice.Last,
 		Ask:           forexPrice.Ask,
 		Bid:           forexPrice.Bid,
-		// Change:           forexPrice.Change,
-		// ChangePercentage: forexPrice.ChangePercentage,
-		// DayLow:  forexPrice.Last,
-		// DayHigh: forexPrice.Last,
-		// YearLow:     forexPrice.YearLow,
-		// YearHigh:    forexPrice.YearHigh,
-		// Avg50Price:  forexPrice.Avg50Price,
-		// Avg200Price: forexPrice.Avg200Price,
-		BaseModel: base.BaseModel{IsActive: true},
+		DayLow:        math.Min(forexPrice.Ask, forexPrice.Bid),
+		DayHigh:       math.Max(forexPrice.Ask, forexPrice.Bid),
+		BaseModel:     base.BaseModel{IsActive: true},
 	}
 
 }
@@ -542,23 +552,3 @@ func safeSubstring(input string, start, end int) string {
 	}
 	return input[start:end] // Return the full slice
 }
-
-// // Function to map ForexPriceResponse to Market
-// func mapForexToMarket(forexPrice ForexPriceResponse) *Market {
-// 	return &Market{
-// 		Code:             forexPrice.Ticker,
-// 		BaseCurrency:     forexPrice.BaseCurrency,
-// 		QuoteCurrency:    forexPrice.QuoteCurrency,
-// 		Price:            forexPrice.Price,
-// 		Change:           forexPrice.Change,
-// 		ChangePercentage: forexPrice.ChangePercentage,
-// 		DayLow:           forexPrice.DayLow,
-// 		DayHigh:          forexPrice.DayHigh,
-// 		YearLow:          forexPrice.YearLow,
-// 		YearHigh:         forexPrice.YearHigh,
-// 		Avg50Price:       forexPrice.Avg50Price,
-// 		Avg200Price:      forexPrice.Avg200Price,
-// 		BaseModel:        base.BaseModel{IsActive: true},
-// 	}
-
-// }
