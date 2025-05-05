@@ -1,16 +1,18 @@
 package withdrawal
 
 import (
-	"arctfrex-customers/internal/account"
-	"arctfrex-customers/internal/common"
-	"arctfrex-customers/internal/common/enums"
-	"arctfrex-customers/internal/market"
+	"context"
 	"errors"
 	"log"
 	"strings"
 	"time"
 
 	"github.com/google/uuid"
+
+	"arctfrex-customers/internal/account"
+	"arctfrex-customers/internal/common"
+	"arctfrex-customers/internal/common/enums"
+	"arctfrex-customers/internal/market"
 )
 
 type WithdrawalUsecase interface {
@@ -21,6 +23,8 @@ type WithdrawalUsecase interface {
 	BackOfficePending() (*[]BackOfficePendingWithdrawal, error)
 	BackOfficePendingDetail(withdrawalId string) (*BackOfficePendingWithdrawalDetail, error)
 	BackOfficePendingApproval(backOfficePendingApproval BackOfficePendingApprovalRequest) error
+	BackOfficePendingSPA(ctx context.Context, request WithdrawalBackOfficeParam) (BackOfficePendingWithdrawalPagination, error)
+	BackOfficePendingMulti(ctx context.Context, request WithdrawalBackOfficeParam) (BackOfficePendingWithdrawalPagination, error)
 }
 
 type withdrawalUsecase struct {
@@ -178,4 +182,28 @@ func (du *withdrawalUsecase) ConvertPriceToUsd(amount float64) (float64, error) 
 	}
 	amountUsd := common.RoundTo4DecimalPlaces(amount * marketCurrencyRate.Rate)
 	return amountUsd, nil
+}
+
+func (wu *withdrawalUsecase) BackOfficePendingSPA(ctx context.Context, request WithdrawalBackOfficeParam) (withdrawal BackOfficePendingWithdrawalPagination, err error) {
+	withdrawal.Pagination = request.Pagination
+	withdrawals, err := wu.withdrawalRepository.GetBackOfficePendingWithdrawalSPA(request)
+	if err != nil {
+		return withdrawal, err
+	}
+
+	withdrawal.Data = withdrawals
+
+	return withdrawal, nil
+}
+
+func (wu *withdrawalUsecase) BackOfficePendingMulti(ctx context.Context, request WithdrawalBackOfficeParam) (withdrawal BackOfficePendingWithdrawalPagination, err error) {
+	withdrawal.Pagination = request.Pagination
+	withdrawals, err := wu.withdrawalRepository.GetBackOfficePendingWithdrawalMulti(request)
+	if err != nil {
+		return withdrawal, err
+	}
+
+	withdrawal.Data = withdrawals
+
+	return withdrawal, nil
 }

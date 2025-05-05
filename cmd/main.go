@@ -31,6 +31,8 @@ import (
 	user_mobile "arctfrex-customers/internal/user/mobile"
 	"arctfrex-customers/internal/whatsapp"
 	"arctfrex-customers/internal/withdrawal"
+	"arctfrex-customers/internal/workflowapprover"
+	"arctfrex-customers/internal/workflowsetting"
 )
 
 func main() {
@@ -167,6 +169,12 @@ func main() {
 	accountUsecase := account.NewAccountUsecase(accountRepository, accountApiclient)
 	account.NewAccountHandler(engine, jwtMiddleware, accountUsecase)
 
+	//Worflow Setting
+	workflowSettingRepository := workflowsetting.NewWorkflowSettingRepository(db)
+
+	//Worflow Approver
+	workflowApproverRepository := workflowapprover.NewWorkflowApproverRepository(db)
+
 	//Order
 	orderRepository := order.NewOrderRepository(db)
 	orderUsecase := order.NewOrderUsecase(orderRepository, accountRepository, marketRepository)
@@ -188,7 +196,14 @@ func main() {
 
 	backofficeDepositApiclient := deposit.NewDepositApiclient()
 	backofficeDepositRepository := deposit.NewDepositRepository(db)
-	backofficeDepositUsecase := deposit.NewDepositUsecase(backofficeDepositRepository, accountRepository, backofficeDepositApiclient, marketRepository)
+	backofficeDepositUsecase := deposit.NewDepositUsecase(
+		backofficeDepositRepository,
+		accountRepository,
+		backofficeDepositApiclient,
+		marketRepository,
+		workflowSettingRepository,
+		workflowApproverRepository,
+	)
 	deposit.NewDepositHandler(engine, jwtMiddleware, backofficeDepositUsecase)
 
 	backofficeWithdrawalApiclient := withdrawal.NewWithdrawalApiclient()

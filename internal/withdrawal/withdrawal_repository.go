@@ -1,10 +1,13 @@
 package withdrawal
 
 import (
-	"arctfrex-customers/internal/base"
-	"arctfrex-customers/internal/common/enums"
+	"fmt"
 
 	"gorm.io/gorm"
+
+	"arctfrex-customers/internal/base"
+	"arctfrex-customers/internal/common"
+	"arctfrex-customers/internal/common/enums"
 )
 
 type withdrawalRepository struct {
@@ -116,4 +119,116 @@ func (dr *withdrawalRepository) UpdateWithdrawalApprovalStatus(withdrawal *Withd
 		"ApprovedBy",
 		"ApprovedAt",
 	).Updates(withdrawal).Error
+}
+
+func (dr *withdrawalRepository) GetBackOfficePendingWithdrawalSPA(request WithdrawalBackOfficeParam) (backOfficePendingWithdrawals []BackOfficePendingWithdrawal, err error) {
+	baseSelect := `
+		withdrawals.id AS withdrawal_id,
+		withdrawals.account_id,
+		withdrawals.user_id, 
+		users.name AS name,
+		users.email,
+		users.meta_login_id, 
+		withdrawals.amount, 
+		withdrawals.amount_usd,
+		withdrawals.approval_status,
+		withdrawals.created_at,
+		withdrawals.bank_name
+	`
+
+	if request.Menutype == common.Settlement {
+		baseSelect += `,
+		bu.name AS finance_by`
+	}
+
+	query := dr.db.Table("withdrawals").
+		Select(baseSelect).
+		Joins("JOIN users ON users.id = withdrawals.user_id").
+		Where("withdrawals.approval_status = ? AND withdrawals.is_active = ?", enums.DepositApprovalStatusPending, true)
+
+	switch request.Menutype {
+	case common.Finance:
+		query = query.
+			Joins("JOIN workflow_approvers AS wa1 ON wa1.document_id = withdrawals.id").
+			Where("wa1.level=1 AND wa1.is_active=? AND wa1.status=?", true, enums.AccountApprovalStatusPending)
+	case common.Settlement:
+		query = query.
+			Joins("JOIN workflow_approvers AS wa1 ON wa1.document_id = withdrawals.id AND wa1.level = 1 AND wa1.status = ? AND wa1.is_active = ?", enums.AccountApprovalStatusApproved, true).
+			Joins("LEFT JOIN backoffice_users AS bu ON wa1.approved_by=bu.id and bu.is_active=?", true).
+			Joins("JOIN workflow_approvers AS wa2 ON wa2.document_id = withdrawals.id").
+			Where("wa2.level=2 AND wa2.is_active=? AND wa2.status=?", true, enums.AccountApprovalStatusPending)
+	default:
+		return backOfficePendingWithdrawals, fmt.Errorf("invalid menu type: %s", request.Menutype)
+	}
+
+	offset := (request.Pagination.CurrentPage - 1) * request.Pagination.PageSize
+
+	if err = query.Count(&request.Pagination.Paging.Total).Error; err != nil {
+		return nil, err
+	}
+
+	if err = query.
+		Limit(request.Pagination.PageSize).
+		Offset(offset).
+		Scan(&backOfficePendingWithdrawals).Error; err != nil {
+		return nil, err
+	}
+
+	return backOfficePendingWithdrawals, nil
+}
+
+func (dr *withdrawalRepository) GetBackOfficePendingWithdrawalMulti(request WithdrawalBackOfficeParam) (backOfficePendingWithdrawals []BackOfficePendingWithdrawal, err error) {
+	baseSelect := `
+		withdrawals.id AS withdrawal_id,
+		withdrawals.account_id,
+		withdrawals.user_id, 
+		users.name AS name,
+		users.email,
+		users.meta_login_id, 
+		withdrawals.amount, 
+		withdrawals.amount_usd,
+		withdrawals.approval_status,
+		withdrawals.created_at,
+		withdrawals.bank_name
+	`
+
+	if request.Menutype == common.Settlement {
+		baseSelect += `,
+		bu.name AS finance_by`
+	}
+
+	query := dr.db.Table("withdrawals").
+		Select(baseSelect).
+		Joins("JOIN users ON users.id = withdrawals.user_id").
+		Where("withdrawals.approval_status = ? AND withdrawals.is_active = ?", enums.DepositApprovalStatusPending, true)
+
+	switch request.Menutype {
+	case common.Finance:
+		query = query.
+			Joins("JOIN workflow_approvers AS wa1 ON wa1.document_id = withdrawals.id").
+			Where("wa1.level=1 AND wa1.is_active=? AND wa1.status=?", true, enums.AccountApprovalStatusPending)
+	case common.Settlement:
+		query = query.
+			Joins("JOIN workflow_approvers AS wa1 ON wa1.document_id = withdrawals.id AND wa1.level = 1 AND wa1.status = ? AND wa1.is_active = ?", enums.AccountApprovalStatusApproved, true).
+			Joins("LEFT JOIN backoffice_users AS bu ON wa1.approved_by=bu.id and bu.is_active=?", true).
+			Joins("JOIN workflow_approvers AS wa2 ON wa2.document_id = withdrawals.id").
+			Where("wa2.level=2 AND wa2.is_active=? AND wa2.status=?", true, enums.AccountApprovalStatusPending)
+	default:
+		return backOfficePendingWithdrawals, fmt.Errorf("invalid menu type: %s", request.Menutype)
+	}
+
+	offset := (request.Pagination.CurrentPage - 1) * request.Pagination.PageSize
+
+	if err = query.Count(&request.Pagination.Paging.Total).Error; err != nil {
+		return nil, err
+	}
+
+	if err = query.
+		Limit(request.Pagination.PageSize).
+		Offset(offset).
+		Scan(&backOfficePendingWithdrawals).Error; err != nil {
+		return nil, err
+	}
+
+	return backOfficePendingWithdrawals, nil
 }

@@ -12,7 +12,7 @@ type WorkflowApprover struct {
 	ID         string                      `json:"id" gorm:"primaryKey"`
 	Level      int                         `json:"level"`
 	DocumentID string                      `json:"document_id"`
-	Status     enums.DepositApprovalStatus `json:"status"`
+	Status     enums.AccountApprovalStatus `json:"status"`
 	ApprovedBy string                      `json:"approved_by"`
 	ApprovedAt time.Time                   `json:"approved_at"`
 
@@ -21,4 +21,8 @@ type WorkflowApprover struct {
 	WorkflowSetting *workflowsetting.WorkflowSetting `gorm:"foreignKey:WorkflowSettingID"`
 
 	base.BaseModel
+}
+
+type WorkflowApproverRepository interface {
+	CreateBulk(workflowApprover []WorkflowApprover) error
 }

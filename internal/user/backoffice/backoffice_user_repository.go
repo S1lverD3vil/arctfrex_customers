@@ -1,9 +1,9 @@
 package user
 
 import (
-	"arctfrex-customers/internal/base"
-
 	"gorm.io/gorm"
+
+	"arctfrex-customers/internal/base"
 )
 
 type backofficeUserRepository struct {
@@ -82,4 +82,13 @@ func (bur *backofficeUserRepository) GetActiveSubordinate(userId string) (*[]Bac
 	}
 
 	return &backofficeUsers, nil
+}
+
+func (bur *backofficeUserRepository) GetUserByUserId(userID string) (*BackofficeUsers, error) {
+	var backofficeUser BackofficeUsers
+	if err := bur.db.Where(&BackofficeUsers{ID: userID}).First(&backofficeUser).Error; err != nil {
+		return nil, err
+	}
+
+	return &backofficeUser, nil
 }

@@ -11,6 +11,7 @@ const (
 	DepositTypeInitialMargin DepositType = iota + 1
 	DepositTypeNormalDeposit
 	DepositTypeCreditIn
+	DepositTypeCreditOut
 )
 
 // String - Creating common behavior - give the type a String function

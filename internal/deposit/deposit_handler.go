@@ -1,12 +1,13 @@
 package deposit
 
 import (
-	"arctfrex-customers/internal/base"
-	"arctfrex-customers/internal/middleware"
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
+	"arctfrex-customers/internal/base"
+	"arctfrex-customers/internal/middleware"
 )
 
 type depositHandler struct {
@@ -31,6 +32,14 @@ func NewDepositHandler(
 	unprotectedRoutesBackOffice.GET("/pending/:depositid", handler.BackOfficePendingDetail)
 	unprotectedRoutesBackOffice.POST("/pending/:depositid", handler.BackOfficePendingDetail)
 	unprotectedRoutesBackOffice.POST("/pending/approval", handler.BackOfficePendingApproval)
+
+	// Get pending deposit SPA
+	unprotectedRoutesBackOffice.GET("/pending/spa/:menutype", handler.BackOfficePendingSPA)
+	unprotectedRoutesBackOffice.GET("/credit/spa/:menutype", handler.BackOfficeCreditSPA)
+
+	// Get pending deposit multi
+	unprotectedRoutesBackOffice.GET("/pending/multi/:menutype", handler.BackOfficePendingMulti)
+	unprotectedRoutesBackOffice.GET("/credit/multi/:menutype", handler.BackOfficeCreaditMulti)
 
 	protectedRoutes.Use(jmw.ValidateToken())
 	{
@@ -114,7 +123,7 @@ func (dh *depositHandler) DepositByAccountId(c *gin.Context) {
 
 	c.JSON(
 		http.StatusOK,
-		DepositApiResponse{base.ApiResponse{Message: "success", Data: deposits}},
+		ApiResponse{base.ApiResponse{Message: "success", Data: deposits}},
 	)
 }
 
@@ -148,7 +157,7 @@ func (dh *depositHandler) BackOfficePending(c *gin.Context) {
 
 	c.JSON(
 		http.StatusOK,
-		DepositApiResponse{base.ApiResponse{Message: "success", Data: deposits}},
+		ApiResponse{base.ApiResponse{Message: "success", Data: deposits}},
 	)
 }
 
@@ -158,7 +167,7 @@ func (dh *depositHandler) BackOfficePendingDetail(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, DepositApiResponse{base.ApiResponse{
+	c.JSON(http.StatusOK, ApiResponse{base.ApiResponse{
 		Message: "success",
 		Data:    pendingDetail,
 	}})
@@ -178,6 +187,106 @@ func (dh *depositHandler) BackOfficePendingApproval(c *gin.Context) {
 
 	c.JSON(
 		http.StatusOK,
-		DepositApiResponse{base.ApiResponse{Message: "success"}},
+		ApiResponse{base.ApiResponse{Message: "success"}},
+	)
+}
+
+func (dh *depositHandler) BackOfficePendingSPA(c *gin.Context) {
+	menutype := c.Param("menutype")
+	request := DepositBackOfficeParam{
+		Menutype: menutype,
+	}
+
+	err := c.ShouldBindQuery(&request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	request.Pagination.Norm()
+
+	deposits, err := dh.depositUsecase.BackOfficePendingSPA(c.Request.Context(), request)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		ApiPaginatedResponse{base.ApiPaginatedResponse{Message: "success", Data: deposits.Data, Pagination: *deposits.Pagination}},
+	)
+}
+
+func (dh *depositHandler) BackOfficePendingMulti(c *gin.Context) {
+	menutype := c.Param("menutype")
+	request := DepositBackOfficeParam{
+		Menutype: menutype,
+	}
+
+	err := c.ShouldBindQuery(&request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	request.Pagination.Norm()
+
+	deposits, err := dh.depositUsecase.BackOfficePendingMulti(c.Request.Context(), request)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		ApiPaginatedResponse{base.ApiPaginatedResponse{Message: "success", Data: deposits.Data, Pagination: *deposits.Pagination}},
+	)
+}
+
+func (dh *depositHandler) BackOfficeCreditSPA(c *gin.Context) {
+	menutype := c.Param("menutype")
+	request := CreditBackOfficeParam{
+		Menutype: menutype,
+	}
+
+	err := c.ShouldBindQuery(&request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	request.Pagination.Norm()
+
+	deposits, err := dh.depositUsecase.BackOfficeCreditSPA(c.Request.Context(), request)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		ApiPaginatedResponse{base.ApiPaginatedResponse{Message: "success", Data: deposits.Data, Pagination: *deposits.Pagination}},
+	)
+}
+
+func (dh *depositHandler) BackOfficeCreaditMulti(c *gin.Context) {
+	menutype := c.Param("menutype")
+	request := CreditBackOfficeParam{
+		Menutype: menutype,
+	}
+
+	err := c.ShouldBindQuery(&request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	request.Pagination.Norm()
+
+	deposits, err := dh.depositUsecase.BackOfficeCreditMulti(c.Request.Context(), request)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		ApiPaginatedResponse{base.ApiPaginatedResponse{Message: "success", Data: deposits.Data, Pagination: *deposits.Pagination}},
 	)
 }

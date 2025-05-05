@@ -1,12 +1,13 @@
 package withdrawal
 
 import (
-	"arctfrex-customers/internal/base"
-	"arctfrex-customers/internal/middleware"
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
+	"arctfrex-customers/internal/base"
+	"arctfrex-customers/internal/middleware"
 )
 
 type withdrawalHandler struct {
@@ -31,6 +32,13 @@ func NewWithdrawalHandler(
 	unprotectedRoutesBackOffice.GET("/pending/:withdrawalid", handler.BackOfficePendingDetail)
 	unprotectedRoutesBackOffice.POST("/pending/:withdrawalid", handler.BackOfficePendingDetail)
 	unprotectedRoutesBackOffice.POST("/pending/approval", handler.BackOfficePendingApproval)
+
+	// Get pending deposit SPA
+	unprotectedRoutesBackOffice.GET("/pending/spa/:menutype", handler.BackOfficePendingSPA)
+
+	// Get pending deposit multi
+	unprotectedRoutesBackOffice.GET("/pending/multi/:menutype", handler.BackOfficePendingMulti)
+
 	protectedRoutes.Use(jmw.ValidateToken())
 	{
 		protectedRoutes.POST("/submit", handler.Submit)
@@ -183,5 +191,55 @@ func (wh *withdrawalHandler) BackOfficePendingApproval(c *gin.Context) {
 	c.JSON(
 		http.StatusOK,
 		WithdrawalApiResponse{base.ApiResponse{Message: "success"}},
+	)
+}
+
+func (wh *withdrawalHandler) BackOfficePendingSPA(c *gin.Context) {
+	menutype := c.Param("menutype")
+	request := WithdrawalBackOfficeParam{
+		Menutype: menutype,
+	}
+
+	err := c.ShouldBindQuery(&request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	request.Pagination.Norm()
+
+	withdrawals, err := wh.withdrawalUsecase.BackOfficePendingSPA(c.Request.Context(), request)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		base.ApiPaginatedResponse{Message: "success", Data: withdrawals.Data, Pagination: *withdrawals.Pagination},
+	)
+}
+
+func (wh *withdrawalHandler) BackOfficePendingMulti(c *gin.Context) {
+	menutype := c.Param("menutype")
+	request := WithdrawalBackOfficeParam{
+		Menutype: menutype,
+	}
+
+	err := c.ShouldBindQuery(&request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	request.Pagination.Norm()
+
+	withdrawals, err := wh.withdrawalUsecase.BackOfficePendingMulti(c.Request.Context(), request)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		base.ApiPaginatedResponse{Message: "success", Data: withdrawals.Data, Pagination: *withdrawals.Pagination},
 	)
 }

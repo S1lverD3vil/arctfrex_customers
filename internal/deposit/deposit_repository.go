@@ -1,10 +1,13 @@
 package deposit
 
 import (
-	"arctfrex-customers/internal/base"
-	"arctfrex-customers/internal/common/enums"
+	"fmt"
 
 	"gorm.io/gorm"
+
+	"arctfrex-customers/internal/base"
+	"arctfrex-customers/internal/common"
+	"arctfrex-customers/internal/common/enums"
 )
 
 type depositRepository struct {
@@ -111,6 +114,120 @@ func (dr *depositRepository) GetBackOfficePendingDeposits() (*[]BackOfficePendin
 	return &backOfficePendingDeposits, nil
 }
 
+func (dr *depositRepository) GetBackOfficePendingDepositSPA(request DepositBackOfficeParam) (backOfficePendingDeposits []BackOfficePendingDeposit, err error) {
+	baseSelect := `
+		deposits.id AS deposit_id,
+		deposits.account_id,
+		deposits.user_id, 
+		users.name AS name,
+		users.email,
+		users.meta_login_id, 
+		deposits.amount, 
+		deposits.approval_status,
+		deposits.created_at,
+		deposits.bank_name,
+		deposits.deposit_type
+	`
+
+	if request.Menutype == common.Settlement {
+		baseSelect += `,
+		bu.name AS finance_by`
+	}
+
+	query := dr.db.Table("deposits").
+		Select(baseSelect).
+		Joins("JOIN users ON users.id = deposits.user_id").
+		Where("deposits.approval_status = ? AND deposits.is_active = ?", enums.DepositApprovalStatusPending, true)
+
+	switch request.Menutype {
+	case common.Finance:
+		query = query.
+			Joins("JOIN workflow_approvers AS wa1 ON wa1.document_id = deposits.id").
+			Where("wa1.level=1 AND wa1.is_active=? AND wa1.status=?", true, enums.AccountApprovalStatusPending).
+			Where("deposits.deposit_type != ?", enums.DepositTypeCreditIn)
+	case common.Settlement:
+		query = query.
+			Joins("JOIN workflow_approvers AS wa1 ON wa1.document_id = deposits.id AND wa1.level = 1 AND (wa1.status = ? OR deposits.deposit_type = ?) AND wa1.is_active = ?", enums.AccountApprovalStatusApproved, enums.DepositTypeCreditIn, true).
+			Joins("LEFT JOIN backoffice_users AS bu ON wa1.approved_by=bu.id and bu.is_active=?", true).
+			Joins("JOIN workflow_approvers AS wa2 ON wa2.document_id = deposits.id").
+			Where("wa2.level=2 AND wa2.is_active=? AND wa2.status=?", true, enums.AccountApprovalStatusPending)
+	default:
+		return backOfficePendingDeposits, fmt.Errorf("invalid menu type: %s", request.Menutype)
+	}
+
+	offset := (request.Pagination.CurrentPage - 1) * request.Pagination.PageSize
+
+	if err = query.Count(&request.Pagination.Paging.Total).Error; err != nil {
+		return nil, err
+	}
+
+	if err = query.
+		Limit(request.Pagination.PageSize).
+		Offset(offset).
+		Scan(&backOfficePendingDeposits).Error; err != nil {
+		return nil, err
+	}
+
+	return backOfficePendingDeposits, nil
+}
+
+func (dr *depositRepository) GetBackOfficePendingDepositMulti(request DepositBackOfficeParam) (backOfficePendingDeposits []BackOfficePendingDeposit, err error) {
+	baseSelect := `
+		deposits.id AS deposit_id,
+		deposits.account_id,
+		deposits.user_id, 
+		users.name AS name,
+		users.email,
+		users.meta_login_id, 
+		deposits.amount, 
+		deposits.approval_status,
+		deposits.created_at,
+		deposits.bank_name,
+		deposits.deposit_type
+	`
+
+	if request.Menutype == common.Settlement {
+		baseSelect += `,
+		bu.name AS finance_by`
+	}
+
+	query := dr.db.Table("deposits").
+		Select(baseSelect).
+		Joins("JOIN users ON users.id = deposits.user_id").
+		Where("deposits.approval_status = ? AND deposits.is_active = ?", enums.DepositApprovalStatusPending, true)
+
+	switch request.Menutype {
+	case common.Finance:
+		query = query.
+			Joins("JOIN workflow_approvers AS wa1 ON wa1.document_id = deposits.id").
+			Where("wa1.level=1 AND wa1.is_active=? AND wa1.status=?", true, enums.AccountApprovalStatusPending).
+			Where("deposits.deposit_type != ?", enums.DepositTypeCreditIn)
+	case common.Settlement:
+		query = query.
+			Joins("JOIN workflow_approvers AS wa1 ON wa1.document_id = deposits.id AND wa1.level = 1 AND (wa1.status = ? OR deposits.deposit_type = ?) AND wa1.is_active = ?", enums.AccountApprovalStatusApproved, enums.DepositTypeCreditIn, true).
+			Joins("LEFT JOIN backoffice_users AS bu ON wa1.approved_by=bu.id and bu.is_active=?", true).
+			Joins("JOIN workflow_approvers AS wa2 ON wa2.document_id = deposits.id").
+			Where("wa2.level=2 AND wa2.is_active=? AND wa2.status=?", true, enums.AccountApprovalStatusPending)
+	default:
+		return backOfficePendingDeposits, fmt.Errorf("invalid menu type: %s", request.Menutype)
+	}
+
+	offset := (request.Pagination.CurrentPage - 1) * request.Pagination.PageSize
+
+	if err = query.Count(&request.Pagination.Paging.Total).Error; err != nil {
+		return nil, err
+	}
+
+	if err = query.
+		Limit(request.Pagination.PageSize).
+		Offset(offset).
+		Scan(&backOfficePendingDeposits).Error; err != nil {
+		return nil, err
+	}
+
+	return backOfficePendingDeposits, nil
+}
+
 func (dr *depositRepository) GetBackOfficePendingDepositDetail(depositId string) (*BackOfficePendingDepositDetail, error) {
 	var backOfficePendingDepositDetail BackOfficePendingDepositDetail
 	if err := dr.db.Table("deposits").
@@ -156,4 +273,130 @@ func (dr *depositRepository) Update(deposit *Deposit) error {
 
 func (dr *depositRepository) SaveDepositPhoto(deposit *Deposit) error {
 	return dr.db.Save(deposit).Error
+}
+
+func (dr *depositRepository) GetBackOfficeCreditSPA(request CreditBackOfficeParam) (backOfficeCredits []BackOfficeCreditInOut, err error) {
+	baseSelect := `
+		deposits.id AS deposit_id,
+		deposits.account_id,
+		deposits.user_id, 
+		users.name AS name,
+		users.email,
+		users.meta_login_id, 
+		deposits.amount, 
+		deposits.approval_status,
+		deposits.created_at,
+		deposits.bank_name,
+		deposits.deposit_type,
+		bu.name AS finance_by
+	`
+
+	if request.Menutype == common.CreditIn {
+		baseSelect += `,
+		bu2.name AS dealing_by`
+	}
+
+	query := dr.db.Table("deposits").
+		Select(baseSelect).
+		Joins("JOIN users ON users.id = deposits.user_id").
+		Where("deposits.is_active = ?", true)
+
+	switch request.Menutype {
+	case common.CreditIn:
+		query = query.
+			Joins("JOIN workflow_approvers AS wa1 ON wa1.document_id = deposits.id").
+			Joins("LEFT JOIN backoffice_users AS bu ON wa1.approved_by=bu.id and bu.is_active=?", true).
+			Joins("JOIN workflow_approvers AS wa2 ON wa2.document_id = deposits.id").
+			Joins("LEFT JOIN backoffice_users AS bu2 ON wa2.approved_by=bu2.id and bu2.is_active=?", true).
+			Where("wa1.level=1 AND wa1.is_active=?", true).
+			Where("wa2.level=2 AND wa2.is_active=?", true).
+			Where("deposits.deposit_type = ?", enums.DepositTypeCreditIn)
+	case common.CreditOut:
+		query = query.
+			Joins("JOIN workflow_approvers AS wa1 ON wa1.document_id = deposits.id AND wa1.level = 1 AND wa1.is_active = ?", true).
+			Joins("LEFT JOIN backoffice_users AS bu ON wa1.approved_by=bu.id and bu.is_active=?", true).
+			Joins("JOIN workflow_approvers AS wa2 ON wa2.document_id = deposits.id").
+			Where("wa2.level=2 AND wa2.is_active=? ", true).
+			Where("deposits.deposit_type = ?", enums.DepositTypeCreditOut)
+	default:
+		return backOfficeCredits, fmt.Errorf("invalid menu type: %s", request.Menutype)
+	}
+
+	offset := (request.Pagination.CurrentPage - 1) * request.Pagination.PageSize
+
+	if err = query.Count(&request.Pagination.Paging.Total).Error; err != nil {
+		return nil, err
+	}
+
+	if err = query.
+		Limit(request.Pagination.PageSize).
+		Offset(offset).
+		Scan(&backOfficeCredits).Error; err != nil {
+		return nil, err
+	}
+
+	return backOfficeCredits, nil
+}
+
+func (dr *depositRepository) GetBackOfficeCreditMulti(request CreditBackOfficeParam) (backOfficeCredits []BackOfficeCreditInOut, err error) {
+	baseSelect := `
+		deposits.id AS deposit_id,
+		deposits.account_id,
+		deposits.user_id, 
+		users.name AS name,
+		users.email,
+		users.meta_login_id, 
+		deposits.amount, 
+		deposits.approval_status,
+		deposits.created_at,
+		deposits.bank_name,
+		deposits.deposit_type,
+		bu.name AS finance_by
+	`
+
+	if request.Menutype == common.CreditIn {
+		baseSelect += `,
+		bu2.name AS dealing_by`
+	}
+
+	query := dr.db.Table("deposits").
+		Select(baseSelect).
+		Joins("JOIN users ON users.id = deposits.user_id").
+		Where("deposits.is_active = ?", true)
+
+	switch request.Menutype {
+	case common.CreditIn:
+		query = query.
+			Joins("JOIN workflow_approvers AS wa1 ON wa1.document_id = deposits.id").
+			Joins("LEFT JOIN backoffice_users AS bu ON wa1.approved_by=bu.id and bu.is_active=?", true).
+			Joins("JOIN workflow_approvers AS wa2 ON wa2.document_id = deposits.id").
+			Joins("LEFT JOIN backoffice_users AS bu2 ON wa2.approved_by=bu2.id and bu2.is_active=?", true).
+			Where("wa1.level=1 AND wa1.is_active=?", true).
+			Where("wa2.level=2 AND wa2.is_active=?", true).
+			Where("deposits.deposit_type = ?", enums.DepositTypeCreditIn)
+	case common.CreditOut:
+		query = query.
+			Joins("JOIN workflow_approvers AS wa1 ON wa1.document_id = deposits.id AND wa1.level = 1 AND wa1.is_active = ?", true).
+			Joins("LEFT JOIN backoffice_users AS bu ON wa1.approved_by=bu.id and bu.is_active=?", true).
+			Joins("JOIN workflow_approvers AS wa2 ON wa2.document_id = deposits.id").
+			Where("wa2.level=2 AND wa2.is_active=? ", true).
+			Where("deposits.deposit_type = ?", enums.DepositTypeCreditOut)
+	default:
+		return backOfficeCredits, fmt.Errorf("invalid menu type: %s", request.Menutype)
+	}
+
+	offset := (request.Pagination.CurrentPage - 1) * request.Pagination.PageSize
+
+	if err = query.Count(&request.Pagination.Paging.Total).Error; err != nil {
+		return nil, err
+	}
+
+	if err = query.
+		Limit(request.Pagination.PageSize).
+		Offset(offset).
+		Scan(&backOfficeCredits).Error; err != nil {
+		return nil, err
+	}
+
+	return backOfficeCredits, nil
 }

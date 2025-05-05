@@ -1,9 +1,11 @@
 package deposit
 
 import (
-	"arctfrex-customers/internal/base"
-	"arctfrex-customers/internal/common/enums"
 	"time"
+
+	"arctfrex-customers/internal/base"
+	"arctfrex-customers/internal/common"
+	"arctfrex-customers/internal/common/enums"
 )
 
 type Deposit struct {
@@ -56,14 +58,36 @@ type DepositDetail struct {
 }
 
 type BackOfficePendingDeposit struct {
-	Depositid      string                      `json:"depositid"`
-	Accountid      string                      `json:"accountid"`
-	Userid         string                      `json:"userid"`
+	DepositID      string                      `json:"deposit_id"`
+	AccountID      string                      `json:"account_id"`
+	UserID         string                      `json:"user_id"`
 	Name           string                      `json:"name"`
 	Email          string                      `json:"email"`
 	Amount         float64                     `json:"amount"`
-	AmountUsd      float64                     `json:"amount_usd"`
+	AmountUSD      float64                     `json:"amount_usd"`
 	ApprovalStatus enums.DepositApprovalStatus `json:"approval_status"`
+	CreatedAt      time.Time                   `json:"created_at"`
+	BankName       string                      `json:"bank_name"`
+	MetaLoginID    int64                       `json:"meta_login_id"`
+	DepositType    enums.DepositType           `json:"deposit_type"`
+	FinanceBy      string                      `json:"finance_by"`
+}
+
+type BackOfficeCreditInOut struct {
+	DepositID      string                      `json:"deposit_id"`
+	AccountID      string                      `json:"account_id"`
+	UserID         string                      `json:"user_id"`
+	Name           string                      `json:"name"`
+	Email          string                      `json:"email"`
+	Amount         float64                     `json:"amount"`
+	AmountUSD      float64                     `json:"amount_usd"`
+	ApprovalStatus enums.DepositApprovalStatus `json:"approval_status"`
+	CreatedAt      time.Time                   `json:"created_at"`
+	BankName       string                      `json:"bank_name"`
+	MetaLoginID    int64                       `json:"meta_login_id"`
+	DepositType    enums.DepositType           `json:"deposit_type"`
+	FinanceBy      string                      `json:"finance_by"`
+	DealingBy      string                      `json:"dealing_by"`
 }
 
 type BackOfficePendingDepositDetail struct {
@@ -88,14 +112,38 @@ type BackOfficePendingApprovalRequest struct {
 	UserLogin   string            `json:"userlogin"`
 }
 
-type DepositApiResponse struct {
+type ApiResponse struct {
 	base.ApiResponse
+}
+
+type ApiPaginatedResponse struct {
+	base.ApiPaginatedResponse
 }
 
 type TradeDeposit struct {
 	Login  int64   `json:"Login"`
 	Amount float64 `json:"Amount"`
 	Result string  `json:"result"`
+}
+
+type DepositBackOfficeParam struct {
+	Menutype   string
+	Pagination *common.TableListParams
+}
+
+type BackOfficePendingDepositPagination struct {
+	Data       []BackOfficePendingDeposit
+	Pagination *common.TableListParams
+}
+
+type CreditBackOfficeParam struct {
+	Menutype   string
+	Pagination *common.TableListParams
+}
+
+type BackOfficeCreditPagination struct {
+	Data       []BackOfficeCreditInOut
+	Pagination *common.TableListParams
 }
 
 type DepositRepository interface {
@@ -110,4 +158,8 @@ type DepositRepository interface {
 	UpdateDepositApprovalStatus(deposit *Deposit) error
 	Update(deposit *Deposit) error
 	SaveDepositPhoto(deposit *Deposit) error
+	GetBackOfficePendingDepositSPA(request DepositBackOfficeParam) ([]BackOfficePendingDeposit, error)
+	GetBackOfficePendingDepositMulti(request DepositBackOfficeParam) ([]BackOfficePendingDeposit, error)
+	GetBackOfficeCreditSPA(request CreditBackOfficeParam) ([]BackOfficeCreditInOut, error)
+	GetBackOfficeCreditMulti(request CreditBackOfficeParam) ([]BackOfficeCreditInOut, error)
 }

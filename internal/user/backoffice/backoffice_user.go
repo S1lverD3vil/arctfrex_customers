@@ -62,4 +62,5 @@ type BackofficeUserRepository interface {
 	Update(user *BackofficeUsers) error
 	GetActiveSubordinate(userId string) (*[]BackofficeUsers, error)
 	GetActiveUsersByRoleId(roleId string) ([]BackofficeUsers, error)
+	GetUserByUserId(userID string) (*BackofficeUsers, error)
 }

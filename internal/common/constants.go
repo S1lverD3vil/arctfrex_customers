@@ -45,3 +45,14 @@ const (
 	passwordLength                               = 12 // Minimum recommended length
 	ARC_META_INTEGRATOR_BASEURL                  = "ARC_META_INTEGRATOR_BASEURL"
 )
+
+const (
+	WorkflowDepositApprover = "deposit-approver"
+)
+
+const (
+	Finance    = "finance"
+	Settlement = "settlement"
+	CreditIn   = "credit-in"
+	CreditOut  = "credit-out"
+)

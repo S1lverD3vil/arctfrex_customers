@@ -11,3 +11,16 @@ type WorkflowSetting struct {
 
 	base.BaseModel
 }
+
+type WorkflowConfig struct {
+	Approvers []Approver `json:"approvers"`
+}
+
+type Approver struct {
+	Level  int    `json:"level"`
+	RoleID string `json:"role_id"`
+}
+
+type WorkflowSettingRepository interface {
+	GetWorkflowSettingByWorkflowType(workflowType string) (*WorkflowSetting, error)
+}
