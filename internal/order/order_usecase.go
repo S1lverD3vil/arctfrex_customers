@@ -1,20 +1,21 @@
 package order
 
 import (
-	"arctfrex-customers/internal/account"
-	"arctfrex-customers/internal/common"
-	"arctfrex-customers/internal/common/enums"
-	"arctfrex-customers/internal/market"
 	"errors"
 	"sort"
 	"strings"
 	"time"
 
 	"github.com/google/uuid"
+
+	"arctfrex-customers/internal/common"
+	"arctfrex-customers/internal/common/enums"
+	"arctfrex-customers/internal/model"
+	"arctfrex-customers/internal/repository"
 )
 
 type OrderUsecase interface {
-	Orders(webSocketRequest WebSocketRequest) (*[]Orders, account.Account, error)
+	Orders(webSocketRequest WebSocketRequest) (*[]Orders, model.Account, error)
 	Submit(order *Order) error
 	UpdateByOrderId(order *Order) error
 	CloseAllOrderByTypeStatus(orderCloseAllRequest *OrderCloseAll) error
@@ -23,14 +24,14 @@ type OrderUsecase interface {
 
 type orderUsecase struct {
 	orderRepository   OrderRepository
-	accountRepository account.AccountRepository
-	marketRepository  market.MarketRepository
+	accountRepository repository.AccountRepository
+	marketRepository  repository.MarketRepository
 }
 
 func NewOrderUsecase(
 	or OrderRepository,
-	ar account.AccountRepository,
-	mr market.MarketRepository,
+	ar repository.AccountRepository,
+	mr repository.MarketRepository,
 ) *orderUsecase {
 	return &orderUsecase{
 		orderRepository:   or,
@@ -39,11 +40,11 @@ func NewOrderUsecase(
 	}
 }
 
-func (ou *orderUsecase) Orders(webSocketRequest WebSocketRequest) (*[]Orders, account.Account, error) {
+func (ou *orderUsecase) Orders(webSocketRequest WebSocketRequest) (*[]Orders, model.Account, error) {
 	var orders []Orders
 	marketCountries, err := ou.marketRepository.GetActiveMarketCountries()
 	if err != nil {
-		return nil, account.Account{}, errors.New("not found")
+		return nil, model.Account{}, errors.New("not found")
 	}
 	account, err := ou.accountRepository.GetAccountsById(webSocketRequest.AccountId)
 	if err != nil || account == nil || account.ID == common.STRING_EMPTY {
@@ -200,12 +201,12 @@ func (ou *orderUsecase) CloseAllExpiredOrder() error {
 	return ou.orderRepository.UpdateOrderCloseAllExpired()
 }
 
-func getMarketCountry(marketCountries []market.MarketCountry, currencyCode string) (market.MarketCountry, bool) {
+func getMarketCountry(marketCountries []model.MarketCountry, currencyCode string) (model.MarketCountry, bool) {
 	for _, marketCountry := range marketCountries {
 		if marketCountry.CurrencyCode == currencyCode {
 			return marketCountry, true
 		}
 	}
 
-	return market.MarketCountry{}, false
+	return model.MarketCountry{}, false
 }

@@ -1,11 +1,12 @@
 package report
 
 import (
-	"arctfrex-customers/internal/account"
-	"arctfrex-customers/internal/base"
-	"arctfrex-customers/internal/deposit"
 	"fmt"
 	"reflect"
+
+	"arctfrex-customers/internal/base"
+	"arctfrex-customers/internal/model"
+	"arctfrex-customers/internal/repository"
 )
 
 type ReportUsecase interface {
@@ -16,15 +17,15 @@ type ReportUsecase interface {
 
 type reportUsecase struct {
 	reportRepository  ReportRepository
-	accountRepository account.AccountRepository
-	depositRepository deposit.DepositRepository
+	accountRepository repository.AccountRepository
+	depositRepository repository.DepositRepository
 	reportApiClient   ReportApiClient
 }
 
 func NewReportUsecase(
 	rr ReportRepository,
-	ar account.AccountRepository,
-	dr deposit.DepositRepository,
+	ar repository.AccountRepository,
+	dr repository.DepositRepository,
 	rac ReportApiClient,
 ) *reportUsecase {
 	return &reportUsecase{
@@ -89,7 +90,7 @@ func (ru *reportUsecase) GetActiveReportsByCode(reportCode, startDate, endDate s
 			}
 
 			var columns []string
-			typ := reflect.TypeOf(account.ReportProfitLossData{})
+			typ := reflect.TypeOf(model.ReportProfitLossData{})
 			for i := 0; i < typ.NumField(); i++ {
 				columns = append(columns, typ.Field(i).Name)
 			}
@@ -140,7 +141,7 @@ func (ru *reportUsecase) GroupUserLoginsUpdates() error {
 	return nil
 }
 
-func mapToResponse(data account.ReportProfitLossData) ReportProfitLossDataResponse {
+func mapToResponse(data model.ReportProfitLossData) ReportProfitLossDataResponse {
 	return ReportProfitLossDataResponse{
 		MetaLoginID:           data.MetaLoginID,
 		Name:                  data.Name,

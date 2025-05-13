@@ -1,12 +1,6 @@
 package storage
 
 import (
-	"arctfrex-customers/internal/account"
-	"arctfrex-customers/internal/base"
-	"arctfrex-customers/internal/common"
-	"arctfrex-customers/internal/common/enums"
-	"arctfrex-customers/internal/deposit"
-	user_mobile "arctfrex-customers/internal/user/mobile"
 	"errors"
 	"fmt"
 	"log"
@@ -16,6 +10,13 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
+	"arctfrex-customers/internal/base"
+	"arctfrex-customers/internal/common"
+	"arctfrex-customers/internal/common/enums"
+	"arctfrex-customers/internal/model"
+	"arctfrex-customers/internal/repository"
+	user_mobile "arctfrex-customers/internal/user/mobile"
 )
 
 type StorageUsecase interface {
@@ -27,15 +28,15 @@ type StorageUsecase interface {
 type storageUsecase struct {
 	storageMinioClient MinioClient
 	userRepository     user_mobile.UserRepository
-	depositRepository  deposit.DepositRepository
-	accountRepository  account.AccountRepository
+	depositRepository  repository.DepositRepository
+	accountRepository  repository.AccountRepository
 }
 
 func NewStorageUsecase(
 	mc MinioClient,
 	ur user_mobile.UserRepository,
-	dr deposit.DepositRepository,
-	ar account.AccountRepository,
+	dr repository.DepositRepository,
+	ar repository.AccountRepository,
 ) *storageUsecase {
 	return &storageUsecase{
 		storageMinioClient: mc,
@@ -91,7 +92,7 @@ func (su *storageUsecase) UploadFile(userId, accountId, documentType, contentTyp
 					return err
 				}
 
-				depositdb = &deposit.Deposit{
+				depositdb = &model.Deposit{
 					ID:             common.UUIDNormalizer(depositID),
 					AccountID:      accountId,
 					UserID:         userId,
@@ -106,7 +107,7 @@ func (su *storageUsecase) UploadFile(userId, accountId, documentType, contentTyp
 		}
 	case "realaccount_callrecording":
 		{
-			return su.accountRepository.UpdateRealAccountCallRecording(&account.Account{ID: accountId, UserID: userId, RealAccountCallRecording: filePath})
+			return su.accountRepository.UpdateRealAccountCallRecording(&model.Account{ID: accountId, UserID: userId, RealAccountCallRecording: filePath})
 		}
 	default:
 		{

@@ -1,10 +1,11 @@
 package order
 
 import (
-	"arctfrex-customers/internal/account"
+	"time"
+
 	"arctfrex-customers/internal/base"
 	"arctfrex-customers/internal/common/enums"
-	"time"
+	"arctfrex-customers/internal/model"
 )
 
 type Order struct {
@@ -62,10 +63,10 @@ type WebSocketResponse struct {
 	Time    string `json:"time"`
 }
 type OrderData struct {
-	AccountData   account.Account `json:"account_data"`
-	OpenOrders    []Orders        `json:"open_orders"`
-	PendingOrders []Orders        `json:"pending_orders"`
-	HistoryOrders []Orders        `json:"history_orders"`
+	AccountData   model.Account `json:"account_data"`
+	OpenOrders    []Orders      `json:"open_orders"`
+	PendingOrders []Orders      `json:"pending_orders"`
+	HistoryOrders []Orders      `json:"history_orders"`
 }
 type OrderCloseAll struct {
 	AccountID string            `json:"accountid"`

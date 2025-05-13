@@ -1,16 +1,17 @@
 package user
 
 import (
-	"arctfrex-customers/internal/account"
-	"arctfrex-customers/internal/base"
-	"arctfrex-customers/internal/common"
-	"arctfrex-customers/internal/common/enums"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
+
+	"arctfrex-customers/internal/base"
+	"arctfrex-customers/internal/common"
+	"arctfrex-customers/internal/common/enums"
+	"arctfrex-customers/internal/model"
 )
 
 type Users struct {
@@ -167,7 +168,7 @@ func (u *Users) AfterCreate(tx *gorm.DB) (err error) {
 	if err != nil {
 		return err
 	}
-	if err := tx.Save(&account.Account{
+	if err := tx.Save(&model.Account{
 		ID:                common.UUIDNormalizer(accountID),
 		Type:              enums.AccountTypeDemo,
 		ApprovalStatus:    enums.AccountApprovalStatusApproved,
@@ -217,7 +218,7 @@ func (u *Users) AfterUpdateUserByMobilePhone(tx *gorm.DB) (err error) {
 	if err != nil {
 		return err
 	}
-	if err := tx.Save(&account.Account{
+	if err := tx.Save(&model.Account{
 		ID:                common.UUIDNormalizer(accountID),
 		Type:              enums.AccountTypeDemo,
 		ApprovalStatus:    enums.AccountApprovalStatusApproved,

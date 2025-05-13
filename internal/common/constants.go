@@ -47,12 +47,15 @@ const (
 )
 
 const (
-	WorkflowDepositApprover = "deposit-approver"
+	WorkflowDepositApprover    = "deposit-approver"
+	WorkflowWithdrawalApprover = "withdrawal-approver"
 )
 
 const (
-	Finance    = "finance"
-	Settlement = "settlement"
-	CreditIn   = "credit-in"
-	CreditOut  = "credit-out"
+	Finance        = "finance"
+	Settlement     = "settlement"
+	CreditIn       = "credit-in"
+	CreditOut      = "credit-out"
+	DepositType    = "deposit"
+	WithdrawalType = "withdrawal"
 )

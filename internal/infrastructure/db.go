@@ -10,13 +10,11 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 
-	"arctfrex-customers/internal/account"
 	"arctfrex-customers/internal/common"
 	"arctfrex-customers/internal/conversation"
-	"arctfrex-customers/internal/deposit"
 	"arctfrex-customers/internal/grouprole"
 	"arctfrex-customers/internal/inbox"
-	"arctfrex-customers/internal/market"
+	"arctfrex-customers/internal/model"
 	"arctfrex-customers/internal/news"
 	"arctfrex-customers/internal/order"
 	"arctfrex-customers/internal/otp"
@@ -24,9 +22,6 @@ import (
 	"arctfrex-customers/internal/role"
 	backoffice "arctfrex-customers/internal/user/backoffice"
 	mobile "arctfrex-customers/internal/user/mobile"
-	"arctfrex-customers/internal/withdrawal"
-	"arctfrex-customers/internal/workflowapprover"
-	"arctfrex-customers/internal/workflowsetting"
 )
 
 // NewDB initializes a new database connection
@@ -67,12 +62,12 @@ func NewDB() *gorm.DB {
 		&mobile.UserEmergencyContact{},
 		&otp.Otp{},
 		&backoffice.BackofficeUsers{},
-		&market.Market{},
-		&market.MarketCountry{},
-		&market.MarketCurrencyRate{},
-		&account.Account{},
-		&deposit.Deposit{},
-		&withdrawal.Withdrawal{},
+		&model.Market{},
+		&model.MarketCountry{},
+		&model.MarketCurrencyRate{},
+		&model.Account{},
+		&model.Deposit{},
+		&model.Withdrawal{},
 		&news.News{},
 		&news.NewsBulletin{},
 		&order.Order{},
@@ -88,8 +83,8 @@ func NewDB() *gorm.DB {
 		&inbox.Inbox{},
 		&grouprole.GroupRole{},
 		&role.Role{},
-		&workflowsetting.WorkflowSetting{},
-		&workflowapprover.WorkflowApprover{},
+		&model.WorkflowSetting{},
+		&model.WorkflowApprover{},
 	)
 
 	if err != nil {

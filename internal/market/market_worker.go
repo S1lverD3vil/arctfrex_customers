@@ -3,13 +3,15 @@ package market
 import (
 	"log"
 	"time"
+
+	"arctfrex-customers/internal/usecase"
 )
 
 type MarketWorker struct {
-	usecase MarketUsecase
+	usecase usecase.MarketUsecase
 }
 
-func NewMarketWorker(uc MarketUsecase) *MarketWorker {
+func NewMarketWorker(uc usecase.MarketUsecase) *MarketWorker {
 	return &MarketWorker{usecase: uc}
 }
 
