@@ -83,7 +83,7 @@ func (du *depositUsecase) Submit(deposit *model.Deposit) (string, error) {
 			return common.STRING_EMPTY, err
 		}
 
-		err = du.AddWorkflowApprover(deposit, deposit.UserID)
+		err = du.AddWorkflowApprover(depositdb, deposit.UserID)
 		if err != nil {
 			return common.STRING_EMPTY, err
 		}
