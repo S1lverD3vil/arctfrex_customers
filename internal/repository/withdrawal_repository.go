@@ -150,9 +150,9 @@ func (dr *withdrawalRepository) GetBackOfficePendingWithdrawalSPA(request model.
 		withdrawals.bank_name
 	`
 
-	if request.Menutype == common.Settlement {
+	if request.Menutype == common.Finance {
 		baseSelect += `,
-		bu.name AS finance_by`
+		bu.name AS settlement_by`
 	}
 
 	query := dr.db.Table("withdrawals").
@@ -161,11 +161,11 @@ func (dr *withdrawalRepository) GetBackOfficePendingWithdrawalSPA(request model.
 		Where("withdrawals.approval_status = ? AND withdrawals.is_active = ?", enums.DepositApprovalStatusPending, true)
 
 	switch request.Menutype {
-	case common.Finance:
+	case common.Settlement:
 		query = query.
 			Joins("JOIN workflow_approvers AS wa1 ON wa1.document_id = withdrawals.id").
 			Where("wa1.level=1 AND wa1.is_active=? AND wa1.status=?", true, enums.AccountApprovalStatusPending)
-	case common.Settlement:
+	case common.Finance:
 		query = query.
 			Joins("JOIN workflow_approvers AS wa1 ON wa1.document_id = withdrawals.id AND wa1.level = 1 AND wa1.status = ? AND wa1.is_active = ?", enums.AccountApprovalStatusApproved, true).
 			Joins("LEFT JOIN backoffice_users AS bu ON wa1.approved_by=bu.id and bu.is_active=?", true).
@@ -206,9 +206,9 @@ func (dr *withdrawalRepository) GetBackOfficePendingWithdrawalMulti(request mode
 		withdrawals.bank_name
 	`
 
-	if request.Menutype == common.Settlement {
+	if request.Menutype == common.Finance {
 		baseSelect += `,
-		bu.name AS finance_by`
+		bu.name AS settlement_by`
 	}
 
 	query := dr.db.Table("withdrawals").
@@ -217,11 +217,11 @@ func (dr *withdrawalRepository) GetBackOfficePendingWithdrawalMulti(request mode
 		Where("withdrawals.approval_status = ? AND withdrawals.is_active = ?", enums.DepositApprovalStatusPending, true)
 
 	switch request.Menutype {
-	case common.Finance:
+	case common.Settlement:
 		query = query.
 			Joins("JOIN workflow_approvers AS wa1 ON wa1.document_id = withdrawals.id").
 			Where("wa1.level=1 AND wa1.is_active=? AND wa1.status=?", true, enums.AccountApprovalStatusPending)
-	case common.Settlement:
+	case common.Finance:
 		query = query.
 			Joins("JOIN workflow_approvers AS wa1 ON wa1.document_id = withdrawals.id AND wa1.level = 1 AND wa1.status = ? AND wa1.is_active = ?", enums.AccountApprovalStatusApproved, true).
 			Joins("LEFT JOIN backoffice_users AS bu ON wa1.approved_by=bu.id and bu.is_active=?", true).

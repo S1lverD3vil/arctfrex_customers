@@ -52,7 +52,7 @@ type BackOfficePendingWithdrawal struct {
 	CreatedAt      time.Time                      `json:"created_at"`
 	BankName       string                         `json:"bank_name"`
 	MetaLoginID    int64                          `json:"meta_login_id"`
-	FinanceBy      string                         `json:"finance_by"`
+	SettlementBy   string                         `json:"settlement_by"`
 }
 
 type BackOfficePendingWithdrawalDetail struct {
