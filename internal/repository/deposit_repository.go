@@ -163,10 +163,10 @@ func (dr *depositRepository) GetBackOfficePendingDepositSPA(request model.Deposi
 		query = query.
 			Joins("JOIN workflow_approvers AS wa1 ON wa1.document_id = deposits.id").
 			Where("wa1.level=1 AND wa1.is_active=? AND wa1.status=?", true, enums.AccountApprovalStatusPending).
-			Where("deposits.deposit_type != ?", enums.DepositTypeCreditIn)
+			Where("deposits.credit_type IS NULL")
 	case common.Settlement:
 		query = query.
-			Joins("JOIN workflow_approvers AS wa1 ON wa1.document_id = deposits.id AND wa1.level = 1 AND (wa1.status = ? OR deposits.deposit_type = ?) AND wa1.is_active = ?", enums.AccountApprovalStatusApproved, enums.DepositTypeCreditIn, true).
+			Joins("JOIN workflow_approvers AS wa1 ON wa1.document_id = deposits.id AND wa1.level = 1 AND (wa1.status = ? OR deposits.credit_type = ?) AND wa1.is_active = ?", enums.AccountApprovalStatusApproved, enums.TypeCreditIn, true).
 			Joins("LEFT JOIN backoffice_users AS bu ON wa1.approved_by=bu.id and bu.is_active=?", true).
 			Joins("JOIN workflow_approvers AS wa2 ON wa2.document_id = deposits.id").
 			Where("wa2.level=2 AND wa2.is_active=? AND wa2.status=?", true, enums.AccountApprovalStatusPending)
@@ -220,10 +220,10 @@ func (dr *depositRepository) GetBackOfficePendingDepositMulti(request model.Depo
 		query = query.
 			Joins("JOIN workflow_approvers AS wa1 ON wa1.document_id = deposits.id").
 			Where("wa1.level=1 AND wa1.is_active=? AND wa1.status=?", true, enums.AccountApprovalStatusPending).
-			Where("deposits.deposit_type != ?", enums.DepositTypeCreditIn)
+			Where("deposits.credit_type IS NULL")
 	case common.Settlement:
 		query = query.
-			Joins("JOIN workflow_approvers AS wa1 ON wa1.document_id = deposits.id AND wa1.level = 1 AND (wa1.status = ? OR deposits.deposit_type = ?) AND wa1.is_active = ?", enums.AccountApprovalStatusApproved, enums.DepositTypeCreditIn, true).
+			Joins("JOIN workflow_approvers AS wa1 ON wa1.document_id = deposits.id AND wa1.level = 1 AND (wa1.status = ? OR deposits.credit_type = ?) AND wa1.is_active = ?", enums.AccountApprovalStatusApproved, enums.TypeCreditIn, true).
 			Joins("LEFT JOIN backoffice_users AS bu ON wa1.approved_by=bu.id and bu.is_active=?", true).
 			Joins("JOIN workflow_approvers AS wa2 ON wa2.document_id = deposits.id").
 			Where("wa2.level=2 AND wa2.is_active=? AND wa2.status=?", true, enums.AccountApprovalStatusPending)
@@ -329,14 +329,14 @@ func (dr *depositRepository) GetBackOfficeCreditSPA(request model.CreditBackOffi
 			Joins("LEFT JOIN backoffice_users AS bu2 ON wa2.approved_by=bu2.id and bu2.is_active=?", true).
 			Where("wa1.level=1 AND wa1.is_active=?", true).
 			Where("wa2.level=2 AND wa2.is_active=?", true).
-			Where("deposits.deposit_type = ?", enums.DepositTypeCreditIn)
+			Where("deposits.credit_type = ?", enums.TypeCreditIn)
 	case common.CreditOut:
 		query = query.
 			Joins("JOIN workflow_approvers AS wa1 ON wa1.document_id = deposits.id AND wa1.level = 1 AND wa1.is_active = ?", true).
 			Joins("LEFT JOIN backoffice_users AS bu ON wa1.approved_by=bu.id and bu.is_active=?", true).
 			Joins("JOIN workflow_approvers AS wa2 ON wa2.document_id = deposits.id").
 			Where("wa2.level=2 AND wa2.is_active=? ", true).
-			Where("deposits.deposit_type = ?", enums.DepositTypeCreditOut)
+			Where("deposits.credit_type = ?", enums.TypeCreditOut)
 	default:
 		return backOfficeCredits, fmt.Errorf("invalid menu type: %s", request.Menutype)
 	}
@@ -392,14 +392,14 @@ func (dr *depositRepository) GetBackOfficeCreditMulti(request model.CreditBackOf
 			Joins("LEFT JOIN backoffice_users AS bu2 ON wa2.approved_by=bu2.id and bu2.is_active=?", true).
 			Where("wa1.level=1 AND wa1.is_active=?", true).
 			Where("wa2.level=2 AND wa2.is_active=?", true).
-			Where("deposits.deposit_type = ?", enums.DepositTypeCreditIn)
+			Where("deposits.credit_type = ?", enums.TypeCreditIn)
 	case common.CreditOut:
 		query = query.
 			Joins("JOIN workflow_approvers AS wa1 ON wa1.document_id = deposits.id AND wa1.level = 1 AND wa1.is_active = ?", true).
 			Joins("LEFT JOIN backoffice_users AS bu ON wa1.approved_by=bu.id and bu.is_active=?", true).
 			Joins("JOIN workflow_approvers AS wa2 ON wa2.document_id = deposits.id").
 			Where("wa2.level=2 AND wa2.is_active=? ", true).
-			Where("deposits.deposit_type = ?", enums.DepositTypeCreditOut)
+			Where("deposits.credit_type = ?", enums.TypeCreditOut)
 	default:
 		return backOfficeCredits, fmt.Errorf("invalid menu type: %s", request.Menutype)
 	}

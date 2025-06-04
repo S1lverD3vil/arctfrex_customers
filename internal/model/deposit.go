@@ -23,6 +23,7 @@ type Deposit struct {
 	SenderBankAccountName   string                      `json:"sender_bank_account_name"`
 	DepositPhoto            string                      `json:"deposit_photo"`
 	DepositType             enums.DepositType           `json:"deposit_type"`
+	CreditType              enums.CreditType            `json:"credit_type"`
 	ApprovalStatus          enums.DepositApprovalStatus `json:"approval_status"`
 	ApprovedBy              string                      `json:"approved_by"`
 	ApprovedAt              time.Time                   `json:"approved_at"`

@@ -132,7 +132,7 @@ func (workflowApproverUC workflowApproverUsecase) updateAccountDeposit(workflowA
 
 			if isApprovalComplete {
 				deposit.ApprovalStatus = enums.DepositApprovalStatusApproved
-				deposit.DepositType = enums.DepositTypeCreditOut
+				deposit.CreditType = enums.TypeCreditOut
 				deposit.AmountUsd, _ = workflowApproverUC.ConvertPriceToUsd(tx, deposit.Amount)
 
 				account, err := tx.AccountRepository.GetAccountsByIdUserId(deposit.UserID, deposit.AccountID)
