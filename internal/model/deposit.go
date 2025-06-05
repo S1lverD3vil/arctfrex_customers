@@ -1,6 +1,7 @@
 package model
 
 import (
+	"errors"
 	"time"
 
 	"arctfrex-customers/internal/base"
@@ -111,6 +112,27 @@ type BackOfficePendingApprovalRequest struct {
 	DepositType enums.DepositType `json:"deposit_type"`
 	Decision    string            `json:"decision"`
 	UserLogin   string            `json:"userlogin"`
+}
+
+type BackOfficeUpdateCreditTypeRequest struct {
+	Depositid           string `json:"deposit_id"`
+	CreditTypeLocaleKey string `json:"credit_type_locale_key"`
+}
+
+func (b BackOfficeUpdateCreditTypeRequest) Validate() error {
+	if b.Depositid == common.STRING_EMPTY {
+		return errors.New("deposit ID is required")
+	}
+
+	if b.CreditTypeLocaleKey == common.STRING_EMPTY {
+		return errors.New("credit type locale key is required")
+	}
+
+	if _, ok := enums.CreditTypeLocaleKeyToId[b.CreditTypeLocaleKey]; !ok {
+		return errors.New("invalid credit type locale key")
+	}
+
+	return nil
 }
 
 type ApiResponse struct {

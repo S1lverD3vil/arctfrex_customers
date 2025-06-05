@@ -30,6 +30,7 @@ type DepositUsecase interface {
 	BackOfficePendingMulti(ctx context.Context, request model.DepositBackOfficeParam) (model.BackOfficePendingDepositPagination, error)
 	BackOfficeCreditSPA(ctx context.Context, request model.CreditBackOfficeParam) (model.BackOfficeCreditPagination, error)
 	BackOfficeCreditMulti(ctx context.Context, request model.CreditBackOfficeParam) (model.BackOfficeCreditPagination, error)
+	BackOfficeUpdateCreditType(backOfficeUpdateCreditType model.BackOfficeUpdateCreditTypeRequest) error
 }
 
 type depositUsecase struct {
@@ -300,4 +301,20 @@ func (du *depositUsecase) BackOfficeCreditMulti(ctx context.Context, request mod
 	credit.Data = credits
 
 	return credit, nil
+}
+
+func (du *depositUsecase) BackOfficeUpdateCreditType(backOfficeUpdateCreditType model.BackOfficeUpdateCreditTypeRequest) error {
+	deposit, err := du.depositRepository.GetPendingDepositsById(backOfficeUpdateCreditType.Depositid)
+	if err != nil || deposit.ID == common.STRING_EMPTY {
+		return errors.New("data deposit not found")
+	}
+
+	deposit.CreditType = enums.CreditTypeLocaleKeyToId[backOfficeUpdateCreditType.CreditTypeLocaleKey]
+
+	err = du.depositRepository.Update(deposit)
+	if err != nil {
+		return errors.New("failed to update credit type")
+	}
+
+	return nil
 }

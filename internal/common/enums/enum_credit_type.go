@@ -10,3 +10,8 @@ const (
 func (dt CreditType) String() string {
 	return [...]string{"CreditIn", "CreditOut"}[dt-1]
 }
+
+var CreditTypeLocaleKeyToId = map[string]CreditType{
+	"CreditIn":  TypeCreditIn,
+	"CreditOut": TypeCreditOut,
+}
