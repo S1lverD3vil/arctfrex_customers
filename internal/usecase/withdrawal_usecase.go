@@ -96,6 +96,15 @@ func (wu *withdrawalUsecase) Submit(withdrawal *model.Withdrawal) (string, error
 }
 
 func (wu *withdrawalUsecase) AddWorkflowApprover(withdrawal *model.Withdrawal, userID string) error {
+	workflowApprover, err := wu.workflowApproverRepository.GetWorkflowApproverByDocumentId(withdrawal.ID)
+	if err != nil {
+		return err
+	}
+
+	if len(workflowApprover) > 0 && withdrawal.ApprovalStatus == enums.WithdrawalApprovalStatusPending {
+		return nil
+	}
+
 	workflowSetting, err := wu.workflowSettingRepository.GetWorkflowSettingByWorkflowType(common.WorkflowWithdrawalApprover)
 	if err != nil {
 		return err

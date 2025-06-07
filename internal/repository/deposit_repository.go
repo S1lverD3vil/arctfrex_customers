@@ -163,7 +163,7 @@ func (dr *depositRepository) GetBackOfficePendingDepositSPA(request model.Deposi
 		query = query.
 			Joins("JOIN workflow_approvers AS wa1 ON wa1.document_id = deposits.id").
 			Where("wa1.level=1 AND wa1.is_active=? AND wa1.status=?", true, enums.AccountApprovalStatusPending).
-			Where("deposits.credit_type IS NULL")
+			Where("deposits.credit_type IS NULL OR deposits.credit_type = ?", enums.TypeCreditDefault)
 	case common.Settlement:
 		query = query.
 			Joins("JOIN workflow_approvers AS wa1 ON wa1.document_id = deposits.id AND wa1.level = 1 AND (wa1.status = ? OR deposits.credit_type = ?) AND wa1.is_active = ?", enums.AccountApprovalStatusApproved, enums.TypeCreditIn, true).
@@ -220,7 +220,7 @@ func (dr *depositRepository) GetBackOfficePendingDepositMulti(request model.Depo
 		query = query.
 			Joins("JOIN workflow_approvers AS wa1 ON wa1.document_id = deposits.id").
 			Where("wa1.level=1 AND wa1.is_active=? AND wa1.status=?", true, enums.AccountApprovalStatusPending).
-			Where("deposits.credit_type IS NULL")
+			Where("deposits.credit_type IS NULL OR deposits.credit_type = ?", enums.TypeCreditDefault)
 	case common.Settlement:
 		query = query.
 			Joins("JOIN workflow_approvers AS wa1 ON wa1.document_id = deposits.id AND wa1.level = 1 AND (wa1.status = ? OR deposits.credit_type = ?) AND wa1.is_active = ?", enums.AccountApprovalStatusApproved, enums.TypeCreditIn, true).

@@ -111,6 +111,15 @@ func (du *depositUsecase) Submit(deposit *model.Deposit) (string, error) {
 }
 
 func (du *depositUsecase) AddWorkflowApprover(depositdb *model.Deposit, userID string) error {
+	workflowApprover, err := du.workflowApproverRepository.GetWorkflowApproverByDocumentId(depositdb.ID)
+	if err != nil {
+		return err
+	}
+
+	if len(workflowApprover) > 0 && depositdb.ApprovalStatus == enums.DepositApprovalStatusPending {
+		return nil
+	}
+
 	workflowSetting, err := du.workflowSettingRepository.GetWorkflowSettingByWorkflowType(common.WorkflowDepositApprover)
 	if err != nil {
 		return err

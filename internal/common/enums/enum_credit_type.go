@@ -3,7 +3,8 @@ package enums
 type CreditType int
 
 const (
-	TypeCreditIn CreditType = iota + 1
+	TypeCreditDefault CreditType = iota
+	TypeCreditIn
 	TypeCreditOut
 )
 
