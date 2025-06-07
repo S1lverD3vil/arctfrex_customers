@@ -14,7 +14,7 @@ const (
 
 // String - Creating common behavior - give the type a String function
 func (dt DepositType) String() string {
-	return [...]string{"InitialMargin", "NormalDeposit", "CreditIn"}[dt-1]
+	return [...]string{"InitialMargin", "NormalDeposit"}[dt-1]
 }
 
 // EnumIndex - Creating common behavior - give the type a EnumIndex functio

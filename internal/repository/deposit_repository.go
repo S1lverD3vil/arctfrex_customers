@@ -283,6 +283,7 @@ func (dr *depositRepository) UpdateDepositApprovalStatus(deposit *model.Deposit)
 		"ApprovalStatus",
 		"ApprovedBy",
 		"ApprovedAt",
+		"CreditType",
 	).Updates(deposit).Error
 }
 
@@ -318,7 +319,8 @@ func (dr *depositRepository) GetBackOfficeCreditSPA(request model.CreditBackOffi
 	query := dr.db.Table("deposits").
 		Select(baseSelect).
 		Joins("JOIN users ON users.id = deposits.user_id").
-		Where("deposits.is_active = ?", true)
+		Where("deposits.is_active = ?", true).
+		Where("deposits.approval_status != ?", enums.DepositApprovalStatusRejected)
 
 	switch request.Menutype {
 	case common.CreditIn:
@@ -381,7 +383,8 @@ func (dr *depositRepository) GetBackOfficeCreditMulti(request model.CreditBackOf
 	query := dr.db.Table("deposits").
 		Select(baseSelect).
 		Joins("JOIN users ON users.id = deposits.user_id").
-		Where("deposits.is_active = ?", true)
+		Where("deposits.is_active = ?", true).
+		Where("deposits.approval_status != ?", enums.DepositApprovalStatusRejected)
 
 	switch request.Menutype {
 	case common.CreditIn:

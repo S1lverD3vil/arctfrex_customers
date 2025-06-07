@@ -143,6 +143,13 @@ type ApiPaginatedResponse struct {
 	base.ApiPaginatedResponse
 }
 
+type TradeDepositRequest struct {
+	Login     int64   `json:"Login"`
+	Amount    float64 `json:"Amount"`
+	Result    string  `json:"result"`
+	TradeType string  `json:"trade_type"`
+}
+
 type TradeDeposit struct {
 	Login  int64   `json:"Login"`
 	Amount float64 `json:"Amount"`

@@ -126,26 +126,27 @@ func (workflowApproverUC workflowApproverUsecase) updateAccountDeposit(workflowA
 			return response, err
 		}
 
-		if isApprovalComplete || enums.DepositApprovalStatus(approverReject.Status) == enums.DepositApprovalStatusRejected {
+		isTradeCreditOut := workflowApproverUpdate.Level == 1 && deposit.CreditType == enums.TypeCreditIn
+		isTradeCreditIn := workflowApproverUpdate.Level == 2 && deposit.CreditType == enums.TypeCreditIn
+		isRejected := enums.DepositApprovalStatus(approverReject.Status) == enums.DepositApprovalStatusRejected
+
+		if isApprovalComplete || enums.DepositApprovalStatus(approverReject.Status) == enums.DepositApprovalStatusRejected || isTradeCreditIn {
 			deposit.ApprovedAt = time.Now()
-			deposit.ApprovalStatus = enums.DepositApprovalStatusRejected
 
-			if isApprovalComplete {
-				deposit.ApprovalStatus = enums.DepositApprovalStatusApproved
-				deposit.CreditType = enums.TypeCreditOut
+			isDepositEnabled := (isApprovalComplete || isTradeCreditIn) && !isTradeCreditOut && !isRejected
+			if isDepositEnabled {
 				deposit.AmountUsd, _ = workflowApproverUC.ConvertPriceToUsd(tx, deposit.Amount)
-
 				account, err := tx.AccountRepository.GetAccountsByIdUserId(deposit.UserID, deposit.AccountID)
 				if err != nil || account == nil || account.ID == common.STRING_EMPTY {
 					return response, errors.New("record not found")
 				}
 
-				tradeDeposit := model.TradeDeposit{
+				tradeDepositRequest := model.TradeDeposit{
 					Login:  account.MetaLoginId,
 					Amount: deposit.AmountUsd,
 				}
 
-				demoAccountTopUpData, err := workflowApproverUC.depositApiClient.TradeDeposit(tradeDeposit)
+				demoAccountTopUpData, err := workflowApproverUC.depositApiClient.TradeDeposit(tradeDepositRequest)
 				if err != nil {
 					log.Println(demoAccountTopUpData.Result)
 				}
@@ -157,11 +158,27 @@ func (workflowApproverUC workflowApproverUsecase) updateAccountDeposit(workflowA
 					return response, errors.New("failed to top up account")
 				}
 			}
+		}
 
-			err = tx.DepositRepository.UpdateDepositApprovalStatus(deposit)
-			if err != nil {
-				return response, err
-			}
+		if enums.DepositApprovalStatus(approverReject.Status) == enums.DepositApprovalStatusRejected {
+			deposit.ApprovalStatus = enums.DepositApprovalStatusRejected
+		}
+
+		isApproverWithoutCreditInOut := isApprovalComplete && !isTradeCreditIn && !isTradeCreditOut
+		if isApproverWithoutCreditInOut {
+			deposit.ApprovalStatus = enums.DepositApprovalStatusApproved
+		}
+
+		isApproverWithCreditInOut := (isTradeCreditOut && isApprovalComplete) || (isTradeCreditIn && isApprovalComplete)
+		if isApproverWithCreditInOut {
+			deposit.ApprovalStatus = enums.DepositApprovalStatusApproved
+			deposit.CreditType = enums.TypeCreditOut
+		}
+
+		deposit.DepositType = approverReject.DepositType
+		err = tx.DepositRepository.UpdateDepositApprovalStatus(deposit)
+		if err != nil {
+			return response, err
 		}
 
 		return response, nil
@@ -234,6 +251,11 @@ func (workflowApproverUsecase workflowApproverUsecase) populateWorkflowApprover(
 
 		if isStatusInvalid {
 			return isApproverComplete, workflowApproverUpdate, fmt.Errorf("workflow approver status is not pending")
+		}
+
+		isRejectedDisallowed := workflowApprover.Level == 2 && workflowApprover.Status == enums.AccountApprovalStatusApproved && enums.DepositApprovalStatus(approverReject.Status) == enums.DepositApprovalStatusRejected && approverReject.WorkflowType == common.WorkflowDepositApprover && approverReject.Level == 1
+		if isRejectedDisallowed {
+			return isApproverComplete, workflowApproverUpdate, fmt.Errorf("cannot reject the settlement level has already been approved")
 		}
 
 		if isStatusChangeValid {

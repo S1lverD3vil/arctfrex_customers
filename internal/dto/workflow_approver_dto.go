@@ -13,6 +13,7 @@ type ApproveRejectRequest struct {
 	DocumentID   string                      `json:"document_id"`
 	Level        int                         `json:"level"`
 	Status       enums.AccountApprovalStatus `json:"status"`
+	DepositType  enums.DepositType           `json:"deposit_type"`
 	WorkflowType string                      `json:"workflow_type"`
 	UserID       string
 }
@@ -49,6 +50,10 @@ func (w *ApproveRejectRequest) ValidationRequest() error {
 		w.WorkflowType,
 	) {
 		return fmt.Errorf("workflow type cannot be other than deposit-approver or withdrawal-approver")
+	}
+
+	if enums.DepositType(w.DepositType) == 0 {
+		return fmt.Errorf("deposit type is mismatch")
 	}
 
 	return nil
