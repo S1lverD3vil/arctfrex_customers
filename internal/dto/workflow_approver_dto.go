@@ -52,8 +52,8 @@ func (w *ApproveRejectRequest) ValidationRequest() error {
 		return fmt.Errorf("workflow type cannot be other than deposit-approver or withdrawal-approver")
 	}
 
-	if enums.DepositType(w.DepositType) == 0 {
-		return fmt.Errorf("deposit type is mismatch")
+	if enums.DepositType(w.DepositType) == 0 && w.WorkflowType == common.WorkflowDepositApprover {
+		return fmt.Errorf("deposit type is required for deposit approver workflow")
 	}
 
 	return nil

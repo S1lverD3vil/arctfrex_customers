@@ -148,7 +148,8 @@ func (workflowApproverUC workflowApproverUsecase) updateAccountDeposit(workflowA
 
 				demoAccountTopUpData, err := workflowApproverUC.depositApiClient.TradeDeposit(tradeDepositRequest)
 				if err != nil {
-					log.Println(demoAccountTopUpData.Result)
+					log.Println(demoAccountTopUpData.Result, "TradeDeposit failed with error:", err)
+					return response, errors.New("failed to top up account due to trade deposit error")
 				}
 
 				account.Balance += deposit.AmountUsd
