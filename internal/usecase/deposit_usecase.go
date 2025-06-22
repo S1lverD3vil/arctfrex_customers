@@ -31,6 +31,8 @@ type DepositUsecase interface {
 	BackOfficeCreditSPA(ctx context.Context, request model.CreditBackOfficeParam) (model.BackOfficeCreditPagination, error)
 	BackOfficeCreditMulti(ctx context.Context, request model.CreditBackOfficeParam) (model.BackOfficeCreditPagination, error)
 	BackOfficeUpdateCreditType(backOfficeUpdateCreditType model.BackOfficeUpdateCreditTypeRequest) error
+	BackOfficeCreditSPADetail(ctx context.Context, request model.CreditBackOfficeDetailParam) (*model.BackOfficeCreditDetail, error)
+	BackOfficeCreditMultiDetail(ctx context.Context, request model.CreditBackOfficeDetailParam) (*model.BackOfficeCreditDetail, error)
 }
 
 type depositUsecase struct {
@@ -326,4 +328,40 @@ func (du *depositUsecase) BackOfficeUpdateCreditType(backOfficeUpdateCreditType 
 	}
 
 	return nil
+}
+
+func (du *depositUsecase) BackOfficeCreditSPADetail(ctx context.Context, request model.CreditBackOfficeDetailParam) (*model.BackOfficeCreditDetail, error) {
+	creditType := enums.TypeCreditIn
+	if request.Menutype != common.Settlement {
+		creditType = enums.TypeCreditOut
+	}
+
+	creditDetail, err := du.depositRepository.GetBackOfficeCreditDetailByDepositID(request.DepositID, creditType)
+	if err != nil {
+		return nil, errors.New("record not found")
+	}
+
+	if creditDetail == nil || creditDetail.DepositID == common.STRING_EMPTY {
+		return nil, errors.New("record not found")
+	}
+
+	return creditDetail, nil
+}
+
+func (du *depositUsecase) BackOfficeCreditMultiDetail(ctx context.Context, request model.CreditBackOfficeDetailParam) (*model.BackOfficeCreditDetail, error) {
+	creditType := enums.TypeCreditIn
+	if request.Menutype != common.Settlement {
+		creditType = enums.TypeCreditOut
+	}
+
+	creditDetail, err := du.depositRepository.GetBackOfficeCreditDetailByDepositID(request.DepositID, creditType)
+	if err != nil {
+		return nil, errors.New("record not found")
+	}
+
+	if creditDetail == nil || creditDetail.DepositID == common.STRING_EMPTY {
+		return nil, errors.New("record not found")
+	}
+
+	return creditDetail, nil
 }

@@ -27,6 +27,7 @@ type DepositRepository interface {
 	GetBackOfficePendingDepositMulti(request model.DepositBackOfficeParam) ([]model.BackOfficePendingDeposit, error)
 	GetBackOfficeCreditSPA(request model.CreditBackOfficeParam) ([]model.BackOfficeCreditInOut, error)
 	GetBackOfficeCreditMulti(request model.CreditBackOfficeParam) ([]model.BackOfficeCreditInOut, error)
+	GetBackOfficeCreditDetailByDepositID(depositId string, creditType enums.CreditType) (*model.BackOfficeCreditDetail, error)
 }
 
 type depositRepository struct {
@@ -251,7 +252,7 @@ func (dr *depositRepository) GetBackOfficePendingDepositDetail(depositId string)
 	var backOfficePendingDepositDetail model.BackOfficePendingDepositDetail
 	if err := dr.db.Table("deposits").
 		Joins("JOIN users ON users.id = deposits.user_id").
-		Select("deposits.id as depositid, deposits.account_id as accountid, deposits.user_id as userid, users.name as name, users.email, deposits.amount, deposits.bank_name, deposits.bank_account_number, deposits.bank_beneficiary_name, deposits.deposit_photo as deposit_photo, deposits.approval_status as approval_status").
+		Select("deposits.id as depositid, deposits.account_id as accountid, deposits.user_id as userid, users.name as name, users.email, deposits.amount,deposits.amount_usd, deposits.bank_name, deposits.bank_account_number, deposits.bank_beneficiary_name, deposits.deposit_photo as deposit_photo, deposits.approval_status as approval_status").
 		Where("deposits.approval_status = ? AND deposits.is_active = ? AND deposits.id = ?", enums.DepositApprovalStatusPending, true, depositId).
 		Scan(&backOfficePendingDepositDetail).Error; err != nil {
 
@@ -421,4 +422,18 @@ func (dr *depositRepository) GetBackOfficeCreditMulti(request model.CreditBackOf
 	}
 
 	return backOfficeCredits, nil
+}
+
+func (dr *depositRepository) GetBackOfficeCreditDetailByDepositID(depositId string, creditType enums.CreditType) (*model.BackOfficeCreditDetail, error) {
+	var backOfficeCreditDetail model.BackOfficeCreditDetail
+	if err := dr.db.Table("deposits").
+		Joins("JOIN users ON users.id = deposits.user_id").
+		Select("deposits.id as deposit_id, deposits.account_id , deposits.user_id , users.name as name, users.email, deposits.amount, deposits.amount_usd, deposits.bank_name, deposits.bank_account_number, deposits.bank_beneficiary_name, deposits.deposit_photo as deposit_photo, deposits.approval_status as approval_status").
+		Where("deposits.is_active = ? AND deposits.id = ? AND deposits.credit_type = ?", true, depositId, creditType).
+		Scan(&backOfficeCreditDetail).Error; err != nil {
+
+		return nil, err
+	}
+
+	return &backOfficeCreditDetail, nil
 }

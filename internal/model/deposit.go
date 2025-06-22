@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"slices"
 	"time"
 
 	"arctfrex-customers/internal/base"
@@ -174,4 +175,40 @@ type CreditBackOfficeParam struct {
 type BackOfficeCreditPagination struct {
 	Data       []BackOfficeCreditInOut
 	Pagination *common.TableListParams
+}
+
+type CreditBackOfficeDetailParam struct {
+	Menutype  string
+	DepositID string
+}
+
+func (c CreditBackOfficeDetailParam) Validate() error {
+	if c.Menutype == common.STRING_EMPTY {
+		return errors.New("menutype is required")
+	}
+
+	if c.DepositID == common.STRING_EMPTY {
+		return errors.New("deposit ID is required")
+	}
+
+	if !slices.Contains([]string{common.Finance, common.Settlement}, c.Menutype) {
+		return errors.New("invalid menutype")
+	}
+
+	return nil
+}
+
+type BackOfficeCreditDetail struct {
+	DepositID           string                      `json:"deposit_id"`
+	AccountID           string                      `json:"account_id"`
+	UserID              string                      `json:"user_id"`
+	Name                string                      `json:"name"`
+	Email               string                      `json:"email"`
+	Amount              float64                     `json:"amount"`
+	AmountUsd           float64                     `json:"amount_usd"`
+	BankName            string                      `json:"bank_name"`
+	BankAccountNumber   string                      `json:"bank_account_number"`
+	BankBeneficiaryName string                      `json:"bank_beneficiary_name"`
+	DepositPhoto        string                      `json:"deposit_photo"`
+	ApprovalStatus      enums.DepositApprovalStatus `json:"approval_status"`
 }

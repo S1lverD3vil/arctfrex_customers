@@ -45,6 +45,12 @@ func NewDepositHandler(
 
 	unprotectedRoutesBackOffice.PATCH(":depositid/credit-type", handler.BackOfficeUpdateCreditType)
 
+	// Get credit deposit SPA
+	unprotectedRoutesBackOffice.GET("/credit/spa/:menutype/:depositid", handler.BackOfficeCreditSPADetail)
+
+	// Get credit deposit SPA
+	unprotectedRoutesBackOffice.GET("/credit/multi/:menutype/:depositid", handler.BackOfficeCreditMultiDetail)
+
 	protectedRoutes.Use(jmw.ValidateToken())
 	{
 		protectedRoutes.POST("/submit", handler.Submit)
@@ -320,4 +326,48 @@ func (dh *depositHandler) BackOfficeUpdateCreditType(c *gin.Context) {
 		http.StatusOK,
 		model.ApiResponse{ApiResponse: base.ApiResponse{Message: "success", Data: backOfficeUpdateCreditTypeRequest}},
 	)
+}
+
+func (dh *depositHandler) BackOfficeCreditSPADetail(c *gin.Context) {
+	param := model.CreditBackOfficeDetailParam{
+		Menutype:  c.Param("menutype"),
+		DepositID: c.Param("depositid"),
+	}
+
+	if err := param.Validate(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	creditDetail, err := dh.depositUsecase.BackOfficeCreditSPADetail(c.Request.Context(), param)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, model.ApiResponse{ApiResponse: base.ApiResponse{
+		Message: "success",
+		Data:    creditDetail,
+	}})
+}
+
+func (dh *depositHandler) BackOfficeCreditMultiDetail(c *gin.Context) {
+	param := model.CreditBackOfficeDetailParam{
+		Menutype:  c.Param("menutype"),
+		DepositID: c.Param("depositid"),
+	}
+
+	if err := param.Validate(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	creditDetail, err := dh.depositUsecase.BackOfficeCreditMultiDetail(c.Request.Context(), param)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, model.ApiResponse{ApiResponse: base.ApiResponse{
+		Message: "success",
+		Data:    creditDetail,
+	}})
 }
