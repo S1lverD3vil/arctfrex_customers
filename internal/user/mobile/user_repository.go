@@ -1,12 +1,13 @@
 package user
 
 import (
-	"arctfrex-customers/internal/base"
-	"arctfrex-customers/internal/common"
-	"arctfrex-customers/internal/common/enums"
 	"fmt"
 
 	"gorm.io/gorm"
+
+	"arctfrex-customers/internal/base"
+	"arctfrex-customers/internal/common"
+	"arctfrex-customers/internal/common/enums"
 )
 
 // userRepository struct implements the UserRepository interface
@@ -82,6 +83,55 @@ func (ur *userRepository) GetActiveUserProfileByUserId(userId string) (*UserProf
 	}
 
 	return &userProfile, nil
+}
+
+func (ur *userRepository) GetActiveUserProfileDetailByUserID(userID string) (*UserProfileDetail, error) {
+	var userProfileDetail UserProfileDetail
+
+	if err := ur.db.Table("users").
+		Joins(`
+			LEFT JOIN user_profiles 
+				ON users.id = user_profiles.id 
+				AND user_profiles.is_active = ?`,
+			true,
+		).
+		Joins(`			
+			LEFT JOIN user_addresses 
+				ON users.id = user_addresses.id 
+				AND user_addresses.is_active = ?`,
+			true,
+		).
+		Select(`
+			users.id as user_id, 
+			users.name as full_name, 
+			users.mobile_phone as mobile_phone,
+			users.home_phone,
+			users.fax_number,
+			user_addresses.dom_postal_code,
+			user_profiles.identity_type,
+			user_profiles.gender,
+			user_profiles.place_of_birth,
+			user_profiles.marital_status,
+			user_profiles.date_of_birth,
+			user_profiles.ktp_number,
+			user_profiles.ktp_photo,
+			user_profiles.selfie_photo,
+			user_profiles.nationality,
+			user_profiles.npwp_number,
+			user_profiles.npwp_photo,
+			user_profiles.additional_document_photo,
+			user_profiles.declaration_video,
+			user_profiles.mother_maiden,
+			user_profiles.created_at,
+			user_profiles.modified_at
+		`).
+		Where("users.id =?", userID).
+		Scan(&userProfileDetail).Error; err != nil {
+
+		return nil, err
+	}
+
+	return &userProfileDetail, nil
 }
 
 func (ur *userRepository) GetActiveUserAddressByUserId(userId string) (*UserAddress, error) {

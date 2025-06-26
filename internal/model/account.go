@@ -26,6 +26,7 @@ type Account struct {
 	MetaLoginId              int64                       `json:"meta_login_id"`
 	MetaLoginPassword        string                      `json:"meta_login_password"`
 	RealAccountCallRecording string                      `json:"realaccount_callrecording"`
+	NoAggreement             string                      `json:"no_aggreement"`
 
 	base.BaseModel
 }

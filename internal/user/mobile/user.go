@@ -19,6 +19,8 @@ type Users struct {
 	Name              string         `json:"customer_name"`
 	Email             string         `gorm:"primary_key;uniqueIndex:idx_email_mobilephone" json:"email" binding:"required,email"`
 	MobilePhone       string         `gorm:"primary_key;uniqueIndex:idx_email_mobilephone" json:"mobilephone" binding:"required"`
+	HomePhone         string         `json:"home_phone"`
+	FaxNumber         string         `json:"fax_number"`
 	Pin               string         `json:"pin"`
 	Device            string         `json:"device"`
 	DeviceId          string         `json:"device_id"`
@@ -52,8 +54,35 @@ type UserProfile struct {
 	NpwpPhoto               string            `json:"npwp_photo"`
 	AdditionalDocumentPhoto string            `json:"additional_document_photo"`
 	DeclarationVideo        string            `json:"declaration_video"`
+	IdentityType            string            `json:"identity_type"` // e.g., KTP, Passport, etc.
+	SpouseName              string            `json:"spouse_name"`
+	DeclaredBankruptByCourt bool              `json:"declared_bankrupt_by_court"`
+	FamilyAffiliation       bool              `json:"family_affiliation"`
 
 	base.BaseModel
+}
+
+type UserProfileDetail struct {
+	UserID                  string            `json:"user_id"`
+	FullName                string            `json:"full_name"`
+	MobilePhone             string            `json:"mobile_phone"`
+	HomePhone               string            `json:"home_phone"`
+	FaxNumber               string            `json:"fax_number"`
+	Gender                  string            `json:"gender"`
+	MaritalStatus           string            `json:"martial_status"`
+	PlaceOfBirth            string            `json:"place_of_birth"`
+	DateOfBirth             common.CustomDate `json:"date_of_birth"` // time_format:"2006-01-02"`
+	Nationality             string            `json:"nationality"`
+	MotherMaiden            string            `json:"mother_maiden"`
+	KTPNumber               string            `json:"ktp_number"`
+	IdentityType            string            `json:"identity_type"` // e.g., KTP, Passport, etc.
+	NPWPNumber              string            `json:"npwp_number"`
+	KTPPhoto                string            `json:"ktp_photo"`
+	SelfiePhoto             string            `json:"selfie_photo"`
+	NPWPPhoto               string            `json:"npwp_photo"`
+	AdditionalDocumentPhoto string            `json:"additional_document_photo"`
+	DeclarationVideo        string            `json:"declaration_video"`
+	DomPostalCode           string            `json:"dom_postal_code"`
 }
 
 type UserAddress struct {
@@ -73,6 +102,7 @@ type UserAddress struct {
 	DomDistrict    string `json:"dom_district"`
 	DomSubDistrict string `json:"dom_subdistrict"`
 	DomAddress     string `json:"dom_address"`
+	DomPostalCode  string `json:"dom_postal_code"`
 
 	ResidenceOwnership string `json:"residence_ownership"`
 
@@ -80,14 +110,17 @@ type UserAddress struct {
 }
 
 type UserEmployment struct {
-	ID             string `gorm:"primary_key" json:"userid"`
-	CompanyName    string `json:"company_name"`
-	CompanyAddress string `json:"company_address"`
-	CompanyCity    string `json:"company_city"`
-	CompanyPhone   string `json:"company_phone"`
-	WorkingSince   string `json:"working_since"`
-	Profession     string `json:"profession"`
-	WorkingField   string `json:"working_field"`
+	ID                string `gorm:"primary_key" json:"userid"`
+	CompanyName       string `json:"company_name"`
+	CompanyAddress    string `json:"company_address"`
+	CompanyCity       string `json:"company_city"`
+	CompanyPhone      string `json:"company_phone"`
+	CompanyPostalCode string `json:"company_postal_code"`
+	WorkingSince      string `json:"working_since"`
+	Profession        string `json:"profession"`
+	WorkingField      string `json:"working_field"`
+	PreviewJobTitle   string `json:"preview_job_title"`
+	JobTitle          string `json:"job_title"`
 
 	base.BaseModel
 }
@@ -107,25 +140,27 @@ type UserFinance struct {
 	BankAccountNumber            string         `json:"bank_account_number"`
 	BankBeneficiaryName          string         `json:"bank_beneficiary_name"`
 	BankAccountType              string         `json:"bank_account_type"`
+	BankPhone                    string         `json:"bank_phone"`
 	InvestmentGoals              string         `json:"investment_goals"`
 	InvestmentExperience         string         `json:"investment_experience"`
 	BankList                     datatypes.JSON `gorm:"type:jsonb" json:"bank_list"` // Column for the array of obj
 	CurrencyRate                 float64        `json:"currency_rate"`
+	ProductServicePlatform       string         `json:"product_service_platform"`
 
 	base.BaseModel
 }
 
 type UserEmergencyContact struct {
-	ID                         string `gorm:"primary_key" json:"userid"`
-	EmergencyContactName       string `json:"emergency_contact_name"`
-	EmergencyContacCountry     string `json:"emergency_contact_country"`
-	EmergencyContacProvince    string `json:"emergency_contact_province"`
-	EmergencyContacCity        string `json:"emergency_contact_city"`
-	EmergencyContacDistrict    string `json:"emergency_contact_district"`
-	EmergencyContacSubDistrict string `json:"emergency_contact_subdistrict"`
-	EmergencyContactAddress    string `json:"emergency_contact_address"`
-	EmergencyContactPhone      string `json:"emergency_contact_phone"`
-	EmergencyContactRelation   string `json:"emergency_contact_relation"`
+	ID                          string `gorm:"primary_key" json:"userid"`
+	EmergencyContactName        string `json:"emergency_contact_name"`
+	EmergencyContactCountry     string `json:"emergency_contact_country"`
+	EmergencyContactProvince    string `json:"emergency_contact_province"`
+	EmergencyContactCity        string `json:"emergency_contact_city"`
+	EmergencyContactDistrict    string `json:"emergency_contact_district"`
+	EmergencyContactSubDistrict string `json:"emergency_contact_subdistrict"`
+	EmergencyContactAddress     string `json:"emergency_contact_address"`
+	EmergencyContactPhone       string `json:"emergency_contact_phone"`
+	EmergencyContactRelation    string `json:"emergency_contact_relation"`
 
 	base.BaseModel
 }
@@ -313,6 +348,7 @@ type UserRepository interface {
 	GetActiveUserByUserId(userId string) (*Users, error)
 	GetActiveUserByUserIdSessionId(userId, sessionId string) (*Users, error)
 	GetActiveUserProfileByUserId(userId string) (*UserProfile, error)
+	GetActiveUserProfileDetailByUserID(userID string) (*UserProfileDetail, error)
 	GetActiveUserAddressByUserId(userId string) (*UserAddress, error)
 	GetActiveUserEmploymentByUserId(userId string) (*UserEmployment, error)
 	GetActiveUserFinanceByUserId(userId string) (*UserFinance, error)

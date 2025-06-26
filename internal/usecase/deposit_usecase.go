@@ -332,7 +332,7 @@ func (du *depositUsecase) BackOfficeUpdateCreditType(backOfficeUpdateCreditType 
 
 func (du *depositUsecase) BackOfficeCreditSPADetail(ctx context.Context, request model.CreditBackOfficeDetailParam) (*model.BackOfficeCreditDetail, error) {
 	creditType := enums.TypeCreditIn
-	if request.Menutype != common.Settlement {
+	if request.Menutype == common.Settlement {
 		creditType = enums.TypeCreditOut
 	}
 

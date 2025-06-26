@@ -4,9 +4,10 @@ import (
 	"log"
 	"net/http"
 
-	"arctfrex-customers/internal/middleware"
-
 	"github.com/gin-gonic/gin"
+
+	"arctfrex-customers/internal/base"
+	"arctfrex-customers/internal/middleware"
 )
 
 // userHandler handles HTTP requests for user operations
@@ -242,7 +243,7 @@ func (uh *userHandler) BackOfficeCustomersGetProfile(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, userProfile)
+	c.JSON(http.StatusOK, base.ApiResponse{Message: "success", Data: userProfile})
 }
 
 func (uh *userHandler) BackOfficeCustomersUpdateProfile(c *gin.Context) {

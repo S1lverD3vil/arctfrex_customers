@@ -7,11 +7,11 @@ import (
 	"strings"
 	"time"
 
-	"arctfrex-customers/internal/auth"
-	"arctfrex-customers/internal/common"
-
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+
+	"arctfrex-customers/internal/auth"
+	"arctfrex-customers/internal/common"
 )
 
 type UserUsecase interface {
@@ -24,7 +24,7 @@ type UserUsecase interface {
 	Delete(user *Users) error
 	UpdatePin(mobilePhone, pin string) error
 	UpdateProfile(userID string, userProfile *UserProfile) error
-	GetProfile(userID string) (*UserProfile, error)
+	GetProfile(userID string) (*UserProfileDetail, error)
 	UpdateAddress(userID string, userAddress *UserAddress) error
 	GetAddress(userID string) (*UserAddress, error)
 	UpdateEmployment(userID string, userEmployment *UserEmployment) error
@@ -296,8 +296,9 @@ func (uu *userUsecase) UpdateProfile(userID string, userProfile *UserProfile) er
 	return uu.userRepository.UpdateProfile(userProfile)
 }
 
-func (uu *userUsecase) GetProfile(userID string) (*UserProfile, error) {
-	userProfile, err := uu.userRepository.GetActiveUserProfileByUserId(userID)
+func (uu *userUsecase) GetProfile(userID string) (*UserProfileDetail, error) {
+
+	userProfile, err := uu.userRepository.GetActiveUserProfileDetailByUserID(userID)
 	if userProfile == nil || err != nil {
 		return nil, errors.New("user not found")
 	}
