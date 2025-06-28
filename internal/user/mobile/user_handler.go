@@ -258,7 +258,8 @@ func (uh *userHandler) BackOfficeCustomersUpdateProfile(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, base.ApiResponse{Message: "success", Data: userProfile})
+
 }
 
 func (uh *userHandler) UpdateAddress(c *gin.Context) {
@@ -331,7 +332,7 @@ func (uh *userHandler) BackOfficeCustomersUpdateAddress(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, base.ApiResponse{Message: "success", Data: userAddress})
 }
 
 func (uh *userHandler) UpdateEmployment(c *gin.Context) {
@@ -405,7 +406,7 @@ func (uh *userHandler) BackOfficeCustomersUpdateEmployment(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, base.ApiResponse{Message: "success", Data: userEmployment})
 }
 
 func (uh *userHandler) UpdateFinance(c *gin.Context) {
@@ -480,7 +481,7 @@ func (uh *userHandler) BackOfficeCustomersUpdateFinance(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, base.ApiResponse{Message: "success", Data: userFinance})
 }
 
 func (uh *userHandler) UpdateEmergencyContact(c *gin.Context) {
