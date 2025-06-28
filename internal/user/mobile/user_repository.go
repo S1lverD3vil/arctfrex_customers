@@ -106,7 +106,7 @@ func (ur *userRepository) GetActiveUserProfileDetailByUserID(userID string) (*Us
 			users.name as full_name, 
 			users.mobile_phone as mobile_phone,
 			users.home_phone,
-			users.fax_number,
+			users.fax_phone,
 			user_addresses.dom_postal_code,
 			user_profiles.identity_type,
 			user_profiles.gender,
@@ -126,6 +126,7 @@ func (ur *userRepository) GetActiveUserProfileDetailByUserID(userID string) (*Us
 			user_profiles.modified_at
 		`).
 		Where("users.id =?", userID).
+		Where("users.is_active = ?", true).
 		Scan(&userProfileDetail).Error; err != nil {
 
 		return nil, err
@@ -164,19 +165,53 @@ func (ur *userRepository) GetActiveUserEmploymentByUserId(userId string) (*UserE
 	return &userEmployment, nil
 }
 
-func (ur *userRepository) GetActiveUserFinanceByUserId(userId string) (*UserFinance, error) {
-	var userFinance UserFinance
-	queryParams := UserFinance{
-		ID: userId,
-		BaseModel: base.BaseModel{
-			IsActive: true,
-		},
-	}
-	if err := ur.db.Where(&queryParams).First(&userFinance).Error; err != nil {
+func (ur *userRepository) GetActiveUserFinanceByUserId(userId string) (*UserFinanceDetail, error) {
+	var userFinanceDetail UserFinanceDetail
+
+	if err := ur.db.Table("users").
+		Joins(`
+			LEFT JOIN user_addresses 
+				ON users.id = user_addresses.id 
+				AND user_addresses.is_active = ?`,
+			true,
+		).
+		Joins(`			
+			LEFT JOIN user_finances 
+				ON users.id = user_finances.id
+				AND user_finances.is_active = ?`,
+			true,
+		).
+		Select(`
+			users.id as user_id, 
+			user_addresses.dom_address,
+			user_addresses.ktp_address AS identity_address,
+			user_finances.source_income,
+			user_finances.yearly_income_amount,
+			user_finances.yearly_additional_income_amount,
+			user_finances.estimation_wealth_amount,
+			user_finances.taxable_object_sales_value,
+			user_finances.deposito,
+			user_finances.currency,
+			user_finances.bank_name,
+			user_finances.bank_branch,
+			user_finances.bank_city,
+			user_finances.bank_account_number,
+			user_finances.bank_beneficiary_name,
+			user_finances.bank_account_type,
+			user_finances.bank_phone,
+			user_finances.investment_goals,
+			user_finances.investment_experience,
+			user_finances.bank_list,
+			user_finances.currency_rate,
+			user_finances.product_service_platform
+		`).
+		Where("users.id =?", userId).
+		Where("users.is_active = ?", true).
+		Scan(&userFinanceDetail).Error; err != nil {
 		return nil, err
 	}
 
-	return &userFinance, nil
+	return &userFinanceDetail, nil
 }
 
 func (ur *userRepository) GetActiveUserEmergencyContactByUserId(userId string) (*UserEmergencyContact, error) {

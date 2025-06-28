@@ -20,7 +20,7 @@ type Users struct {
 	Email             string         `gorm:"primary_key;uniqueIndex:idx_email_mobilephone" json:"email" binding:"required,email"`
 	MobilePhone       string         `gorm:"primary_key;uniqueIndex:idx_email_mobilephone" json:"mobilephone" binding:"required"`
 	HomePhone         string         `json:"home_phone"`
-	FaxNumber         string         `json:"fax_number"`
+	FaxPhone          string         `json:"fax_phone"`
 	Pin               string         `json:"pin"`
 	Device            string         `json:"device"`
 	DeviceId          string         `json:"device_id"`
@@ -67,7 +67,7 @@ type UserProfileDetail struct {
 	FullName                string            `json:"full_name"`
 	MobilePhone             string            `json:"mobile_phone"`
 	HomePhone               string            `json:"home_phone"`
-	FaxNumber               string            `json:"fax_number"`
+	FaxPhone                string            `json:"fax_phone"`
 	Gender                  string            `json:"gender"`
 	MaritalStatus           string            `json:"martial_status"`
 	PlaceOfBirth            string            `json:"place_of_birth"`
@@ -125,6 +125,20 @@ type UserEmployment struct {
 	base.BaseModel
 }
 
+type UserEmploymentDetail struct {
+	UserID            string `gorm:"primary_key" json:"user_id"`
+	CompanyName       string `json:"company_name"`
+	CompanyAddress    string `json:"company_address"`
+	CompanyCity       string `json:"company_city"`
+	CompanyPhone      string `json:"company_phone"`
+	CompanyPostalCode string `json:"company_postal_code"`
+	WorkingSince      string `json:"working_since"`
+	Profession        string `json:"profession"`
+	WorkingField      string `json:"working_field"`
+	PreviewJobTitle   string `json:"preview_job_title"`
+	JobTitle          string `json:"job_title"`
+}
+
 type UserFinance struct {
 	ID                           string         `gorm:"primary_key" json:"userid"`
 	SourceIncome                 string         `json:"source_income"`
@@ -148,6 +162,31 @@ type UserFinance struct {
 	ProductServicePlatform       string         `json:"product_service_platform"`
 
 	base.BaseModel
+}
+
+type UserFinanceDetail struct {
+	UserID                       string         `json:"user_id"`
+	SourceIncome                 string         `json:"source_income"`
+	YearlyIncomeAmount           string         `json:"yearly_income_amount"`
+	YearlyAdditionalIncomeAmount string         `json:"yearly_additional_income_amount"`
+	EstimationWealthAmount       string         `json:"estimation_wealth_amount"`
+	TaxableObjectSalesValue      string         `json:"taxable_object_sales_value"`
+	Deposito                     string         `json:"deposito"`
+	Currency                     string         `json:"currency"`
+	BankName                     string         `json:"bank_name"`
+	BankBranch                   string         `json:"bank_branch"`
+	BankCity                     string         `json:"bank_city"`
+	BankAccountNumber            string         `json:"bank_account_number"`
+	BankBeneficiaryName          string         `json:"bank_beneficiary_name"`
+	BankAccountType              string         `json:"bank_account_type"`
+	BankPhone                    string         `json:"bank_phone"`
+	InvestmentGoals              string         `json:"investment_goals"`
+	InvestmentExperience         string         `json:"investment_experience"`
+	BankList                     datatypes.JSON `gorm:"type:jsonb" json:"bank_list"` // Column for the array of obj
+	CurrencyRate                 float64        `json:"currency_rate"`
+	ProductServicePlatform       string         `json:"product_service_platform"`
+	DomAddress                   string         `json:"dom_address"`
+	IdentityAddress              string         `json:"identity_address"`
 }
 
 type UserEmergencyContact struct {
@@ -351,7 +390,7 @@ type UserRepository interface {
 	GetActiveUserProfileDetailByUserID(userID string) (*UserProfileDetail, error)
 	GetActiveUserAddressByUserId(userId string) (*UserAddress, error)
 	GetActiveUserEmploymentByUserId(userId string) (*UserEmployment, error)
-	GetActiveUserFinanceByUserId(userId string) (*UserFinance, error)
+	GetActiveUserFinanceByUserId(userId string) (*UserFinanceDetail, error)
 	GetActiveUserEmergencyContactByUserId(userId string) (*UserEmergencyContact, error)
 	GetActiveUserByMobilePhone(mobilePhone string) (*Users, error)
 	GetUserByEmailAndMobilePhone(email, mobilePhone string) (*Users, error)

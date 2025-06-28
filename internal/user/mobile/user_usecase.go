@@ -28,9 +28,9 @@ type UserUsecase interface {
 	UpdateAddress(userID string, userAddress *UserAddress) error
 	GetAddress(userID string) (*UserAddress, error)
 	UpdateEmployment(userID string, userEmployment *UserEmployment) error
-	GetEmployment(userID string) (*UserEmployment, error)
+	GetEmployment(userID string) (*UserEmploymentDetail, error)
 	UpdateFinance(userID string, userFinance *UserFinance) error
-	GetFinance(userID string) (*UserFinance, error)
+	GetFinance(userID string) (*UserFinanceDetail, error)
 	UpdateEmergencyContact(userID string, userEmegencyContact *UserEmergencyContact) error
 	GetEmergencyContact(userID string) (*UserEmergencyContact, error)
 	BackOfficeGetLeads() (*[]BackOfficeUserLeads, error)
@@ -339,13 +339,27 @@ func (uu *userUsecase) UpdateEmployment(userID string, userEmployment *UserEmplo
 	return uu.userRepository.UpdateEmployment(userEmployment)
 }
 
-func (uu *userUsecase) GetEmployment(userID string) (*UserEmployment, error) {
+func (uu *userUsecase) GetEmployment(userID string) (*UserEmploymentDetail, error) {
 	userEmployment, err := uu.userRepository.GetActiveUserEmploymentByUserId(userID)
 	if userEmployment == nil || err != nil {
 		return nil, errors.New("user not found")
 	}
 
-	return userEmployment, nil
+	data := &UserEmploymentDetail{
+		UserID:            userEmployment.ID,
+		CompanyName:       userEmployment.CompanyName,
+		CompanyAddress:    userEmployment.CompanyAddress,
+		CompanyCity:       userEmployment.CompanyCity,
+		CompanyPhone:      userEmployment.CompanyPhone,
+		Profession:        userEmployment.Profession,
+		CompanyPostalCode: userEmployment.CompanyPostalCode,
+		WorkingSince:      userEmployment.WorkingSince,
+		WorkingField:      userEmployment.WorkingField,
+		PreviewJobTitle:   userEmployment.PreviewJobTitle,
+		JobTitle:          userEmployment.JobTitle,
+	}
+
+	return data, nil
 }
 
 func (uu *userUsecase) UpdateFinance(userID string, userFinance *UserFinance) error {
@@ -360,7 +374,7 @@ func (uu *userUsecase) UpdateFinance(userID string, userFinance *UserFinance) er
 	return uu.userRepository.UpdateFinance(userFinance)
 }
 
-func (uu *userUsecase) GetFinance(userID string) (*UserFinance, error) {
+func (uu *userUsecase) GetFinance(userID string) (*UserFinanceDetail, error) {
 	userFinance, err := uu.userRepository.GetActiveUserFinanceByUserId(userID)
 	if userFinance == nil || err != nil {
 		return nil, errors.New("user not found")

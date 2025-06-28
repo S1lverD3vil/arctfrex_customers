@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"arctfrex-customers/internal/base"
 	"arctfrex-customers/internal/middleware"
 	"arctfrex-customers/internal/model"
 	"arctfrex-customers/internal/usecase"
@@ -169,7 +170,15 @@ func (ah *accountHandler) TopUpAccount(c *gin.Context) {
 }
 
 func (ah *accountHandler) BackOfficeAll(c *gin.Context) {
-	accounts, err := ah.accountUsecase.BackOfficeAll()
+	request := model.BackOfficeAllAccountRequest{}
+	err := c.ShouldBindQuery(&request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	request.Pagination.Norm()
+
+	response, err := ah.accountUsecase.BackOfficeAll(request)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -177,12 +186,20 @@ func (ah *accountHandler) BackOfficeAll(c *gin.Context) {
 
 	c.JSON(
 		http.StatusOK,
-		model.AccountApiResponse{Message: "success", Data: accounts},
+		base.ApiPaginatedResponse{Message: "success", Data: response.Data, Pagination: *response.Pagination},
 	)
 }
 
 func (ah *accountHandler) BackOfficePending(c *gin.Context) {
-	accounts, err := ah.accountUsecase.BackOfficePending()
+	request := model.BackOfficePendingAccountRequest{}
+	err := c.ShouldBindQuery(&request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	request.Pagination.Norm()
+
+	response, err := ah.accountUsecase.BackOfficePending(request)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -190,7 +207,7 @@ func (ah *accountHandler) BackOfficePending(c *gin.Context) {
 
 	c.JSON(
 		http.StatusOK,
-		model.AccountApiResponse{Message: "success", Data: accounts},
+		base.ApiPaginatedResponse{Message: "success", Data: response.Data, Pagination: *response.Pagination},
 	)
 }
 

@@ -380,7 +380,8 @@ func (uh *userHandler) GetEmployment(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, userEmployment)
+
+	c.JSON(http.StatusOK, base.ApiResponse{Message: "success", Data: userEmployment})
 }
 
 func (uh *userHandler) BackOfficeCustomersGetEmployment(c *gin.Context) {
@@ -389,7 +390,7 @@ func (uh *userHandler) BackOfficeCustomersGetEmployment(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, userEmployment)
+	c.JSON(http.StatusOK, base.ApiResponse{Message: "success", Data: userEmployment})
 }
 
 func (uh *userHandler) BackOfficeCustomersUpdateEmployment(c *gin.Context) {
@@ -453,7 +454,8 @@ func (uh *userHandler) GetFinance(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, userFinance)
+
+	c.JSON(http.StatusOK, base.ApiResponse{Message: "success", Data: userFinance})
 }
 
 func (uh *userHandler) BackOfficeCustomersGetFinance(c *gin.Context) {
@@ -462,7 +464,8 @@ func (uh *userHandler) BackOfficeCustomersGetFinance(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, userFinance)
+
+	c.JSON(http.StatusOK, base.ApiResponse{Message: "success", Data: userFinance})
 }
 
 func (uh *userHandler) BackOfficeCustomersUpdateFinance(c *gin.Context) {

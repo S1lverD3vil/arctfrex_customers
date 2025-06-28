@@ -23,8 +23,8 @@ type AccountUsecase interface {
 	PendingCheck(userId string) (*[]model.Account, error)
 	GetAccounts(userId string) (*[]model.Account, error)
 	TopUpAccount(topUpAccount model.TopUpAccount) error
-	BackOfficeAll() (*[]model.BackOfficeAllAccount, error)
-	BackOfficePending() (*[]model.BackOfficePendingAccount, error)
+	BackOfficeAll(request model.BackOfficeAllAccountRequest) (response model.BackOfficeAllAccountResponse, err error)
+	BackOfficePending(request model.BackOfficePendingAccountRequest) (response model.BackOfficePendingAccountResponse, err error)
 	BackOfficePendingApproval(backOfficePendingApproval model.BackOfficePendingAccountApprovalRequest) error
 }
 
@@ -121,28 +121,30 @@ func (au *accountUsecase) TopUpAccount(topUpAccount model.TopUpAccount) error {
 	return au.accountRepository.UpdateAccount(account)
 }
 
-func (au *accountUsecase) BackOfficeAll() (*[]model.BackOfficeAllAccount, error) {
-	accounts, err := au.accountRepository.GetBackOfficeAllAccounts()
+func (au *accountUsecase) BackOfficeAll(request model.BackOfficeAllAccountRequest) (response model.BackOfficeAllAccountResponse, err error) {
+	response.Pagination = request.Pagination
 
-	fmt.Printf("Pending Accounts: %+v\n", accounts)
-
+	accounts, err := au.accountRepository.GetBackOfficeAllAccounts(request)
 	if err != nil {
-		return &[]model.BackOfficeAllAccount{}, errors.New("record not found")
+		return response, errors.New("record not found")
 	}
 
-	return accounts, nil
+	response.Data = accounts
+
+	return response, nil
 }
 
-func (au *accountUsecase) BackOfficePending() (*[]model.BackOfficePendingAccount, error) {
-	accounts, err := au.accountRepository.GetBackOfficePendingAccounts()
+func (au *accountUsecase) BackOfficePending(request model.BackOfficePendingAccountRequest) (response model.BackOfficePendingAccountResponse, err error) {
+	response.Pagination = request.Pagination
 
-	fmt.Printf("Pending Accounts: %+v\n", accounts)
-
+	accounts, err := au.accountRepository.GetBackOfficePendingAccounts(request)
 	if err != nil {
-		return &[]model.BackOfficePendingAccount{}, errors.New("record not found")
+		return response, errors.New("record not found")
 	}
 
-	return accounts, nil
+	response.Data = accounts
+
+	return response, nil
 }
 
 func (au *accountUsecase) BackOfficePendingApproval(backOfficePendingApproval model.BackOfficePendingAccountApprovalRequest) error {

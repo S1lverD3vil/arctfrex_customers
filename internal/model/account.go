@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"arctfrex-customers/internal/base"
+	"arctfrex-customers/internal/common"
 	"arctfrex-customers/internal/common/enums"
 )
 
@@ -38,19 +39,45 @@ type TopUpAccount struct {
 }
 
 type BackOfficeAllAccount struct {
-	Accountid      string                      `json:"accountid"`
-	Userid         string                      `json:"userid"`
-	Name           string                      `json:"name"`
-	Email          string                      `json:"email"`
-	ApprovalStatus enums.AccountApprovalStatus `json:"approval_status"`
+	AccountID       string                      `json:"account_id"`
+	UserID          string                      `json:"user_id"`
+	Name            string                      `json:"name"`
+	Email           string                      `json:"email"`
+	ApprovalStatus  enums.AccountApprovalStatus `json:"approval_status"`
+	NoAggreement    string                      `json:"no_aggreement"`
+	UserMobilePhone string                      `json:"user_mobile_phone"`
+	UserFaxPhone    string                      `json:"user_fax_phone"`
+	UserHomePhone   string                      `json:"user_home_phone"`
+}
+
+type BackOfficeAllAccountRequest struct {
+	Pagination *common.TableListParams
+}
+
+type BackOfficeAllAccountResponse struct {
+	Data       []BackOfficeAllAccount
+	Pagination *common.TableListParams
 }
 
 type BackOfficePendingAccount struct {
-	Accountid      string                      `json:"accountid"`
-	Userid         string                      `json:"userid"`
-	Name           string                      `json:"name"`
-	Email          string                      `json:"email"`
-	ApprovalStatus enums.AccountApprovalStatus `json:"approval_status"`
+	AccountID       string                      `json:"account_id"`
+	UserID          string                      `json:"user_id"`
+	Name            string                      `json:"name"`
+	Email           string                      `json:"email"`
+	ApprovalStatus  enums.AccountApprovalStatus `json:"approval_status"`
+	NoAggreement    string                      `json:"no_aggreement"`
+	UserMobilePhone string                      `json:"user_mobile_phone"`
+	UserFaxPhone    string                      `json:"user_fax_phone"`
+	UserHomePhone   string                      `json:"user_home_phone"`
+}
+
+type BackOfficePendingAccountRequest struct {
+	Pagination *common.TableListParams
+}
+
+type BackOfficePendingAccountResponse struct {
+	Data       []BackOfficePendingAccount
+	Pagination *common.TableListParams
 }
 
 type BackOfficePendingAccountApprovalRequest struct {

@@ -18,8 +18,8 @@ type AccountRepository interface {
 	GetAccountsByIdUserId(userId, accountId string) (*model.Account, error)
 	GetPendingAccounts() (*[]model.Account, error)
 	GetBackOfficePendingAccountUserData(userid string) (*model.AccountUserData, error)
-	GetBackOfficePendingAccounts() (*[]model.BackOfficePendingAccount, error)
-	GetBackOfficeAllAccounts() (*[]model.BackOfficeAllAccount, error)
+	GetBackOfficePendingAccounts(request model.BackOfficePendingAccountRequest) ([]model.BackOfficePendingAccount, error)
+	GetBackOfficeAllAccounts(request model.BackOfficeAllAccountRequest) ([]model.BackOfficeAllAccount, error)
 	GetReportProfitLoss(startDate, endDate string) (*[]model.ReportProfitLossData, error)
 	UpdateAccount(account *model.Account) error
 	UpdateAccountApprovalStatus(account *model.Account) error
@@ -161,43 +161,73 @@ func (ar *accountRepository) GetBackOfficePendingAccountUserData(userid string) 
 	return &accountUserData, nil
 }
 
-func (ar *accountRepository) GetBackOfficePendingAccounts() (*[]model.BackOfficePendingAccount, error) {
+func (ar *accountRepository) GetBackOfficePendingAccounts(request model.BackOfficePendingAccountRequest) ([]model.BackOfficePendingAccount, error) {
 	var backOfficePendingAccounts []model.BackOfficePendingAccount
-	if err := ar.db.Table("accounts").
-		Joins("JOIN users ON users.id = accounts.user_id").
-		Select("accounts.id as accountid, accounts.user_id as userid, users.name as name, users.email, accounts.approval_status as approval_status").
-		Where("accounts.approval_status = ? AND accounts.is_active = ?", enums.AccountApprovalStatusPending, true).
-		Scan(&backOfficePendingAccounts).Error; err != nil {
 
+	query := ar.db.Table("accounts").
+		Joins("JOIN users ON users.id = accounts.user_id").
+		Select(`
+			accounts.id AS account_id,
+			accounts.user_id AS user_id,
+			users.name AS name, users.email,
+			accounts.approval_status AS approval_status,
+			users.mobile_phone AS user_mobile_phone,
+			users.fax_phone AS user_fax_phone,
+			users.home_phone AS user_home_phone,
+			accounts.no_aggreement
+		`).
+		Where("accounts.approval_status = ? AND accounts.is_active = ?", enums.AccountApprovalStatusPending, true)
+
+	offset := (request.Pagination.CurrentPage - 1) * request.Pagination.PageSize
+	if err := query.Count(&request.Pagination.Paging.Total).Error; err != nil {
 		return nil, err
 	}
 
-	return &backOfficePendingAccounts, nil
+	if err := query.
+		Limit(request.Pagination.PageSize).
+		Offset(offset).
+		Scan(&backOfficePendingAccounts).Error; err != nil {
+		return nil, err
+	}
+
+	return backOfficePendingAccounts, nil
 }
 
-func (ar *accountRepository) GetBackOfficeAllAccounts() (*[]model.BackOfficeAllAccount, error) {
+func (ar *accountRepository) GetBackOfficeAllAccounts(request model.BackOfficeAllAccountRequest) ([]model.BackOfficeAllAccount, error) {
 	var backOfficeAllAccounts []model.BackOfficeAllAccount
-	if err := ar.db.Table("accounts").
+
+	query := ar.db.Table("accounts").
 		Joins("JOIN users ON users.id = accounts.user_id").
 		Select(`
-			accounts.id as accountid,
-			accounts.user_id as userid,
-			users.name as name,
+			accounts.id AS account_id,
+			accounts.user_id AS user_id,
+			users.name AS name,
 			users.email,
-			accounts.approval_status as approval_status
+			accounts.approval_status AS approval_status,
+			users.mobile_phone AS user_mobile_phone,
+			users.fax_phone AS user_fax_phone,
+			users.home_phone AS user_home_phone,
+			accounts.no_aggreement
 		`).
 		Where(`
 			accounts.is_active = ?
 			AND accounts.type = ?`,
 			true,
-			enums.AccountTypeReal,
-		).
-		Scan(&backOfficeAllAccounts).Error; err != nil {
+			enums.AccountTypeReal)
 
+	offset := (request.Pagination.CurrentPage - 1) * request.Pagination.PageSize
+	if err := query.Count(&request.Pagination.Paging.Total).Error; err != nil {
 		return nil, err
 	}
 
-	return &backOfficeAllAccounts, nil
+	if err := query.
+		Limit(request.Pagination.PageSize).
+		Offset(offset).
+		Scan(&backOfficeAllAccounts).Error; err != nil {
+		return nil, err
+	}
+
+	return backOfficeAllAccounts, nil
 }
 
 func (ar *accountRepository) GetReportProfitLoss(startDate, endDate string) (*[]model.ReportProfitLossData, error) {
