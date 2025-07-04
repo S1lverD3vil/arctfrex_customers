@@ -48,6 +48,7 @@ type BackOfficeAllAccount struct {
 	UserMobilePhone string                      `json:"user_mobile_phone"`
 	UserFaxPhone    string                      `json:"user_fax_phone"`
 	UserHomePhone   string                      `json:"user_home_phone"`
+	CreatedAt       time.Time                   `json:"created_at"`
 }
 
 type BackOfficeAllAccountRequest struct {
@@ -69,6 +70,7 @@ type BackOfficePendingAccount struct {
 	UserMobilePhone string                      `json:"user_mobile_phone"`
 	UserFaxPhone    string                      `json:"user_fax_phone"`
 	UserHomePhone   string                      `json:"user_home_phone"`
+	CreatedAt       time.Time                   `json:"created_at"`
 }
 
 type BackOfficePendingAccountRequest struct {

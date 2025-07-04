@@ -174,7 +174,8 @@ func (ar *accountRepository) GetBackOfficePendingAccounts(request model.BackOffi
 			users.mobile_phone AS user_mobile_phone,
 			users.fax_phone AS user_fax_phone,
 			users.home_phone AS user_home_phone,
-			accounts.no_aggreement
+			accounts.no_aggreement,
+			accounts.created_at
 		`).
 		Where("accounts.approval_status = ? AND accounts.is_active = ?", enums.AccountApprovalStatusPending, true)
 
@@ -207,7 +208,8 @@ func (ar *accountRepository) GetBackOfficeAllAccounts(request model.BackOfficeAl
 			users.mobile_phone AS user_mobile_phone,
 			users.fax_phone AS user_fax_phone,
 			users.home_phone AS user_home_phone,
-			accounts.no_aggreement
+			accounts.no_aggreement,
+			accounts.created_at
 		`).
 		Where(`
 			accounts.is_active = ?
