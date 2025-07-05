@@ -199,7 +199,20 @@ func (du *depositUsecase) BackOfficePendingDetail(depositId string) (*model.Back
 		return nil, errors.New("user not found")
 	}
 
+	depositDetail.IsInitialMargin = du.IsInitialMargin(depositDetail.Userid, depositDetail.Accountid)
+
 	return depositDetail, nil
+}
+
+func (du *depositUsecase) IsInitialMargin(userID string, accountID string) bool {
+	var isInitialMargin bool
+
+	deposits, err := du.depositRepository.GetDepositsByUserIdAccountId(userID, accountID)
+	if len(*deposits) == 1 && err == nil {
+		isInitialMargin = true
+	}
+
+	return isInitialMargin
 }
 
 func (du *depositUsecase) BackOfficePendingApproval(backOfficePendingApproval model.BackOfficePendingApprovalRequest) error {
@@ -345,6 +358,8 @@ func (du *depositUsecase) BackOfficeCreditSPADetail(ctx context.Context, request
 		return nil, errors.New("record not found")
 	}
 
+	creditDetail.IsInitialMargin = du.IsInitialMargin(creditDetail.UserID, creditDetail.AccountID)
+
 	return creditDetail, nil
 }
 
@@ -362,6 +377,8 @@ func (du *depositUsecase) BackOfficeCreditMultiDetail(ctx context.Context, reque
 	if creditDetail == nil || creditDetail.DepositID == common.STRING_EMPTY {
 		return nil, errors.New("record not found")
 	}
+
+	creditDetail.IsInitialMargin = du.IsInitialMargin(creditDetail.UserID, creditDetail.AccountID)
 
 	return creditDetail, nil
 }

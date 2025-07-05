@@ -106,6 +106,7 @@ type BackOfficePendingDepositDetail struct {
 	BankBeneficiaryName string                      `json:"bank_beneficiary_name"`
 	DepositPhoto        string                      `json:"deposit_photo"`
 	ApprovalStatus      enums.DepositApprovalStatus `json:"approval_status"`
+	IsInitialMargin     bool                        `json:"is_initial_margin"`
 }
 
 type BackOfficePendingApprovalRequest struct {
@@ -211,4 +212,5 @@ type BackOfficeCreditDetail struct {
 	BankBeneficiaryName string                      `json:"bank_beneficiary_name"`
 	DepositPhoto        string                      `json:"deposit_photo"`
 	ApprovalStatus      enums.DepositApprovalStatus `json:"approval_status"`
+	IsInitialMargin     bool                        `json:"is_initial_margin"`
 }
