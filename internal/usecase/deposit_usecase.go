@@ -207,8 +207,13 @@ func (du *depositUsecase) BackOfficePendingDetail(depositId string) (*model.Back
 func (du *depositUsecase) IsInitialMargin(userID string, accountID string) bool {
 	var isInitialMargin bool
 
-	deposits, err := du.depositRepository.GetDepositsByUserIdAccountId(userID, accountID)
-	if len(*deposits) == 1 && err == nil {
+	initialMargin, err := du.depositRepository.GetDepositsByUserIDAccountIDForIsInitialMargin(userID, accountID)
+	if err != nil {
+		log.Println("Error checking initial margin:", err)
+		return isInitialMargin
+	}
+
+	if initialMargin != nil && initialMargin.AccountType == enums.AccountTypeReal && initialMargin.Total == 0 {
 		isInitialMargin = true
 	}
 

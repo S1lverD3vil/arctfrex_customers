@@ -214,3 +214,8 @@ type BackOfficeCreditDetail struct {
 	ApprovalStatus      enums.DepositApprovalStatus `json:"approval_status"`
 	IsInitialMargin     bool                        `json:"is_initial_margin"`
 }
+
+type InitialMargin struct {
+	AccountType enums.AccountType `json:"account_type"`
+	Total       int64             `json:"total"` // Total number of deposits for the account type
+}

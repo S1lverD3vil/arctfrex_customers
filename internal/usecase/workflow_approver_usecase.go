@@ -56,6 +56,22 @@ func NewWorkflowApproverUsecase(
 	}
 }
 
+func (workflowApproverUC workflowApproverUsecase) IsInitialMargin(userID string, accountID string) bool {
+	var isInitialMargin bool
+
+	initialMargin, err := workflowApproverUC.depositRepository.GetDepositsByUserIDAccountIDForIsInitialMargin(userID, accountID)
+	if err != nil {
+		log.Println("Error checking initial margin:", err)
+		return isInitialMargin
+	}
+
+	if initialMargin != nil && initialMargin.AccountType == enums.AccountTypeReal && initialMargin.Total == 0 {
+		isInitialMargin = true
+	}
+
+	return isInitialMargin
+}
+
 func (workflowApproverUC workflowApproverUsecase) ApproveRejectWorkflow(approverReject dto.ApproveRejectRequest) (response dto.ApproveRejectResponse, err error) {
 	var (
 		deposit    *model.Deposit
@@ -75,6 +91,11 @@ func (workflowApproverUC workflowApproverUsecase) ApproveRejectWorkflow(approver
 
 		if deposit.ApprovalStatus != enums.DepositApprovalStatusPending {
 			return response, fmt.Errorf("deposit is not pending")
+		}
+
+		isInitialMargin := workflowApproverUC.IsInitialMargin(deposit.UserID, deposit.AccountID)
+		if isInitialMargin {
+			approverReject.DepositType = enums.DepositTypeInitialMargin
 		}
 
 		isApprovalComplete, workflowApproverUpdate, err := workflowApproverUC.populateWorkflowApprover(approverReject)

@@ -16,6 +16,7 @@ type DepositRepository interface {
 	GetNewDepositByAccountIdUserId(accountId, userId string) (*model.Deposit, error)
 	GetPendingAccountByAccountIdUserId(accountId, userId string) (*model.Deposit, error)
 	GetDepositsByUserIdAccountId(userId, accountId string) (*[]model.Deposits, error)
+	GetDepositsByUserIDAccountIDForIsInitialMargin(userId, accountId string) (*model.InitialMargin, error)
 	GetDepositByIdUserId(userId, depositId string) (*model.Deposit, error)
 	GetBackOfficePendingDeposits() (*[]model.BackOfficePendingDeposit, error)
 	GetBackOfficePendingDepositDetail(depositId string) (*model.BackOfficePendingDepositDetail, error)
@@ -88,6 +89,28 @@ func (dr *depositRepository) GetDepositsByUserIdAccountId(userId, accountId stri
 	}
 
 	return &deposits, nil
+}
+
+func (dr *depositRepository) GetDepositsByUserIDAccountIDForIsInitialMargin(userId, accountId string) (*model.InitialMargin, error) {
+	var initialMargin model.InitialMargin
+
+	if err := dr.db.Table("accounts").
+		Select("accounts.type AS account_type, COUNT(deposits.id) AS total").
+		Joins(`LEFT JOIN deposits 
+			ON deposits.account_id = accounts.id 
+			AND deposits.user_id = accounts.user_id 
+			AND deposits.is_active = ? 
+			AND deposits.approval_status = ?`,
+			true, enums.DepositApprovalStatusApproved).
+		Where("accounts.type = ? AND accounts.id = ? AND accounts.user_id = ? AND accounts.is_active = ?",
+			enums.AccountTypeReal, accountId, userId, true).
+		Group("accounts.type").
+		Scan(&initialMargin).Error; err != nil {
+
+		return &initialMargin, err
+	}
+
+	return &initialMargin, nil
 }
 
 func (dr *depositRepository) GetDepositByIdUserId(userId, depositId string) (*model.Deposit, error) {
