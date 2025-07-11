@@ -24,6 +24,7 @@ type AccountUsecase interface {
 	GetAccounts(userId string) (*[]model.Account, error)
 	TopUpAccount(topUpAccount model.TopUpAccount) error
 	BackOfficeAll(request model.BackOfficeAllAccountRequest) (response model.BackOfficeAllAccountResponse, err error)
+	BackOfficeAccountByMenuType(request model.BackOfficeAccountByMenuTypeRequest) (response model.BackOfficeAccountByMenuTypeResponse, err error)
 	BackOfficePending(request model.BackOfficePendingAccountRequest) (response model.BackOfficePendingAccountResponse, err error)
 	BackOfficePendingApproval(backOfficePendingApproval model.BackOfficePendingAccountApprovalRequest) error
 }
@@ -206,4 +207,24 @@ func (au *accountUsecase) BackOfficePendingApproval(backOfficePendingApproval mo
 	pendingAccount.ApprovedBy = backOfficePendingApproval.UserLogin
 
 	return au.accountRepository.UpdateAccountApprovalStatus(pendingAccount)
+}
+
+func (au *accountUsecase) BackOfficeAccountByMenuType(request model.BackOfficeAccountByMenuTypeRequest) (response model.BackOfficeAccountByMenuTypeResponse, err error) {
+	switch request.MenuType {
+	case common.SPA, common.Multi:
+		response.Pagination = request.Pagination
+		accounts, err := au.accountRepository.GetBackOfficeAccountByFilterParams(model.BackOfficeAccountByFilterParams{
+			Type:           request.Type,
+			ApprovalStatus: request.ApprovalStatus,
+			Pagination:     request.Pagination,
+		})
+		if err != nil {
+			return response, errors.New("record not found")
+		}
+		response.Data = accounts
+	default:
+		return response, errors.New("invalid menu type")
+	}
+
+	return response, nil
 }

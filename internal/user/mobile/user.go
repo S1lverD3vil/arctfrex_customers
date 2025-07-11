@@ -160,6 +160,7 @@ type UserFinance struct {
 	BankList                     datatypes.JSON `gorm:"type:jsonb" json:"bank_list"` // Column for the array of obj
 	CurrencyRate                 float64        `json:"currency_rate"`
 	ProductServicePlatform       string         `json:"product_service_platform"`
+	AccountType                  string         `json:"account_type"` // e.g., Personal, Joint, etc.
 
 	base.BaseModel
 }
@@ -187,6 +188,7 @@ type UserFinanceDetail struct {
 	ProductServicePlatform       string         `json:"product_service_platform"`
 	DomAddress                   string         `json:"dom_address"`
 	IdentityAddress              string         `json:"identity_address"`
+	AccountType                  string         `json:"account_type"` // e.g., Personal, Joint, etc.
 }
 
 type UserEmergencyContact struct {

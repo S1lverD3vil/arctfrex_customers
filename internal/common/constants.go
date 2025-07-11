@@ -58,4 +58,6 @@ const (
 	CreditOut      = "credit-out"
 	DepositType    = "deposit"
 	WithdrawalType = "withdrawal"
+	SPA            = "spa"
+	Multi          = "multi"
 )

@@ -203,7 +203,8 @@ func (ur *userRepository) GetActiveUserFinanceByUserId(userId string) (*UserFina
 			user_finances.investment_experience,
 			user_finances.bank_list,
 			user_finances.currency_rate,
-			user_finances.product_service_platform
+			user_finances.product_service_platform,
+			user_finances.account_type
 		`).
 		Where("users.id =?", userId).
 		Where("users.is_active = ?", true).

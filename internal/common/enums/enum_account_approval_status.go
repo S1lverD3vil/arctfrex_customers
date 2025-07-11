@@ -14,6 +14,13 @@ const (
 	AccountApprovalStatusCancelled
 )
 
+var ApprovalStatusMap = map[string]AccountApprovalStatus{
+	"approved":  AccountApprovalStatusApproved,
+	"rejected":  AccountApprovalStatusRejected,
+	"pending":   AccountApprovalStatusPending,
+	"cancelled": AccountApprovalStatusCancelled,
+}
+
 // String - Creating common behavior - give the type a String function
 func (aas AccountApprovalStatus) String() string {
 	return [...]string{"Approved", "Rejected", "Pending", "Cancelled"}[aas-1]

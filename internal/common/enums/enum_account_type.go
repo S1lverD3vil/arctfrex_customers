@@ -12,6 +12,11 @@ const (
 	AccountTypeDemo
 )
 
+var AccountTypeMap = map[string]AccountType{
+	"real": AccountTypeReal,
+	"demo": AccountTypeDemo,
+}
+
 // String - Creating common behavior - give the type a String function
 func (at AccountType) String() string {
 	return [...]string{"Real", "Demo"}[at-1]

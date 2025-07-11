@@ -1,6 +1,7 @@
 package model
 
 import (
+	"strings"
 	"time"
 
 	"arctfrex-customers/internal/base"
@@ -75,6 +76,53 @@ type BackOfficePendingAccount struct {
 
 type BackOfficePendingAccountRequest struct {
 	Pagination *common.TableListParams
+}
+
+type BackOfficeAccountByMenuTypeRequest struct {
+	MenuType       string                      `json:"menu_type" form:"menu_type"`
+	Type           enums.AccountType           `json:"-"`
+	ApprovalStatus enums.AccountApprovalStatus `json:"-"`
+	Pagination     *common.TableListParams     `json:"pagination" form:"pagination"`
+}
+
+func (b *BackOfficeAccountByMenuTypeRequest) Normalize(accountType string, approvalStatus string) {
+	// Normalize AccountType
+	if val, ok := enums.AccountTypeMap[strings.ToLower(accountType)]; ok {
+		b.Type = val
+	} else {
+		b.Type = enums.AccountTypeDemo
+	}
+
+	// Normalize ApprovalStatus
+	if val, ok := enums.ApprovalStatusMap[strings.ToLower(approvalStatus)]; ok {
+		b.ApprovalStatus = val
+	} else {
+		b.ApprovalStatus = enums.AccountApprovalStatusApproved
+	}
+}
+
+type BackOfficeAccountByMenuTypeResponse struct {
+	Data       []BackOfficeAccountByFilterParamsResponse
+	Pagination *common.TableListParams
+}
+
+type BackOfficeAccountByFilterParams struct {
+	Type           enums.AccountType           `json:"type"`
+	ApprovalStatus enums.AccountApprovalStatus `json:"approval_status"`
+	Pagination     *common.TableListParams
+}
+
+type BackOfficeAccountByFilterParamsResponse struct {
+	AccountID       string                      `json:"account_id"`
+	UserID          string                      `json:"user_id"`
+	Name            string                      `json:"name"`
+	Email           string                      `json:"email"`
+	ApprovalStatus  enums.AccountApprovalStatus `json:"approval_status"`
+	NoAggreement    string                      `json:"no_aggreement"`
+	UserMobilePhone string                      `json:"user_mobile_phone"`
+	UserFaxPhone    string                      `json:"user_fax_phone"`
+	UserHomePhone   string                      `json:"user_home_phone"`
+	CreatedAt       time.Time                   `json:"created_at"`
 }
 
 type BackOfficePendingAccountResponse struct {

@@ -20,6 +20,7 @@ type AccountRepository interface {
 	GetBackOfficePendingAccountUserData(userid string) (*model.AccountUserData, error)
 	GetBackOfficePendingAccounts(request model.BackOfficePendingAccountRequest) ([]model.BackOfficePendingAccount, error)
 	GetBackOfficeAllAccounts(request model.BackOfficeAllAccountRequest) ([]model.BackOfficeAllAccount, error)
+	GetBackOfficeAccountByFilterParams(request model.BackOfficeAccountByFilterParams) ([]model.BackOfficeAccountByFilterParamsResponse, error)
 	GetReportProfitLoss(startDate, endDate string) (*[]model.ReportProfitLossData, error)
 	UpdateAccount(account *model.Account) error
 	UpdateAccountApprovalStatus(account *model.Account) error
@@ -230,6 +231,47 @@ func (ar *accountRepository) GetBackOfficeAllAccounts(request model.BackOfficeAl
 	}
 
 	return backOfficeAllAccounts, nil
+}
+
+func (ar *accountRepository) GetBackOfficeAccountByFilterParams(request model.BackOfficeAccountByFilterParams) ([]model.BackOfficeAccountByFilterParamsResponse, error) {
+	var backOfficeAccounts []model.BackOfficeAccountByFilterParamsResponse
+
+	query := ar.db.Table("accounts").
+		Joins("JOIN users ON users.id = accounts.user_id").
+		Select(`
+			accounts.id AS account_id,
+			accounts.user_id AS user_id,
+			users.name AS name,
+			users.email,
+			accounts.approval_status AS approval_status,
+			users.mobile_phone AS user_mobile_phone,
+			users.fax_phone AS user_fax_phone,
+			users.home_phone AS user_home_phone,
+			accounts.no_aggreement,
+			accounts.created_at
+		`).
+		Where(`
+			accounts.is_active = ?
+			AND accounts.type = ?
+			AND accounts.approval_status = ?`,
+			true,
+			request.Type.EnumIndex(),
+			request.ApprovalStatus.EnumIndex(),
+		)
+
+	offset := (request.Pagination.CurrentPage - 1) * request.Pagination.PageSize
+	if err := query.Count(&request.Pagination.Paging.Total).Error; err != nil {
+		return nil, err
+	}
+
+	if err := query.
+		Limit(request.Pagination.PageSize).
+		Offset(offset).
+		Scan(&backOfficeAccounts).Error; err != nil {
+		return nil, err
+	}
+
+	return backOfficeAccounts, nil
 }
 
 func (ar *accountRepository) GetReportProfitLoss(startDate, endDate string) (*[]model.ReportProfitLossData, error) {

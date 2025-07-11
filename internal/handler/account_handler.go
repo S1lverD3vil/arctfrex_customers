@@ -33,6 +33,9 @@ func NewAccountHandler(
 
 	unprotectedRoutesBackOffice.GET("/all", handler.BackOfficeAll)
 	unprotectedRoutesBackOffice.GET("/pending", handler.BackOfficePending)
+
+	unprotectedRoutesBackOffice.GET("/:menutype", handler.BackOfficeAccountByMenuType)
+
 	// unprotectedRoutesBackOffice.POST("/pending", handler.BackOfficePending)
 	unprotectedRoutesBackOffice.POST("/pending/approval", handler.BackOfficePendingApproval)
 	protectedRoutes.Use(jmw.ValidateToken())
@@ -226,5 +229,31 @@ func (ah *accountHandler) BackOfficePendingApproval(c *gin.Context) {
 	c.JSON(
 		http.StatusOK,
 		model.AccountApiResponse{Message: "success"},
+	)
+}
+
+func (ah *accountHandler) BackOfficeAccountByMenuType(c *gin.Context) {
+	request := model.BackOfficeAccountByMenuTypeRequest{
+		MenuType: c.Param("menutype"),
+	}
+
+	err := c.ShouldBindQuery(&request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	request.Pagination.Norm()
+	request.Normalize(c.Query("account_type"), c.Query("status"))
+
+	response, err := ah.accountUsecase.BackOfficeAccountByMenuType(request)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		base.ApiPaginatedResponse{Message: "success", Data: response.Data, Pagination: *response.Pagination},
 	)
 }
