@@ -58,6 +58,7 @@ func (au *accountUsecase) Submit(account *model.Account) error {
 	account.IsActive = true
 	account.Type = enums.AccountTypeReal
 	account.ApprovalStatus = enums.AccountApprovalStatusPending
+	account.NoAggreement = common.GenerateShortID("PAN")
 
 	return au.accountRepository.Create(account)
 }

@@ -1,19 +1,23 @@
-package user
+package handler
 
 import (
-	"arctfrex-customers/internal/middleware"
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
+	"arctfrex-customers/internal/base"
+	"arctfrex-customers/internal/middleware"
+	"arctfrex-customers/internal/model"
+	"arctfrex-customers/internal/usecase"
 )
 
 type backofficeUserHandler struct {
 	jwtMiddleware         *middleware.JWTMiddleware
-	backofficeUserUsecase BackofficeUserUsecase
+	backofficeUserUsecase usecase.BackofficeUserUsecase
 }
 
-func NewBackofficeHandler(engine *gin.Engine, jmw *middleware.JWTMiddleware, buu *backofficeUserUsecase) *backofficeUserHandler {
+func NewBackofficeHandler(engine *gin.Engine, jmw *middleware.JWTMiddleware, buu usecase.BackofficeUserUsecase) *backofficeUserHandler {
 	handler := &backofficeUserHandler{
 		jwtMiddleware:         jmw,
 		backofficeUserUsecase: buu,
@@ -35,7 +39,7 @@ func NewBackofficeHandler(engine *gin.Engine, jmw *middleware.JWTMiddleware, buu
 }
 
 func (buh *backofficeUserHandler) Register(c *gin.Context) {
-	var backofficeUser BackofficeUsers
+	var backofficeUser model.BackofficeUsers
 	if err := c.ShouldBindJSON(&backofficeUser); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -48,7 +52,7 @@ func (buh *backofficeUserHandler) Register(c *gin.Context) {
 }
 
 func (buh *backofficeUserHandler) LoginSession(c *gin.Context) {
-	var backofficeUser BackofficeUsers
+	var backofficeUser model.BackofficeUsers
 	if err := c.ShouldBindJSON(&backofficeUser); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -70,7 +74,7 @@ func (buh *backofficeUserHandler) All(c *gin.Context) {
 
 	c.JSON(
 		http.StatusOK,
-		BackofficeUserApiResponse{Message: "success", Data: users},
+		base.ApiResponse{Message: "success", Data: users},
 	)
 }
 
@@ -83,7 +87,7 @@ func (buh *backofficeUserHandler) AllByRoleID(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, BackofficeUserApiResponse{
+	c.JSON(http.StatusOK, base.ApiResponse{
 		Message: "success",
 		Data:    users,
 	})
@@ -108,6 +112,6 @@ func (buh *backofficeUserHandler) Subordinate(c *gin.Context) {
 
 	c.JSON(
 		http.StatusOK,
-		BackofficeUserApiResponse{Message: "success", Data: subBackofficeUsers},
+		base.ApiResponse{Message: "success", Data: subBackofficeUsers},
 	)
 }

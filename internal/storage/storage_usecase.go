@@ -16,7 +16,6 @@ import (
 	"arctfrex-customers/internal/common/enums"
 	"arctfrex-customers/internal/model"
 	"arctfrex-customers/internal/repository"
-	user_mobile "arctfrex-customers/internal/user/mobile"
 )
 
 type StorageUsecase interface {
@@ -27,14 +26,14 @@ type StorageUsecase interface {
 
 type storageUsecase struct {
 	storageMinioClient MinioClient
-	userRepository     user_mobile.UserRepository
+	userRepository     repository.UserRepository
 	depositRepository  repository.DepositRepository
 	accountRepository  repository.AccountRepository
 }
 
 func NewStorageUsecase(
 	mc MinioClient,
-	ur user_mobile.UserRepository,
+	ur repository.UserRepository,
 	dr repository.DepositRepository,
 	ar repository.AccountRepository,
 ) *storageUsecase {
@@ -68,19 +67,19 @@ func (su *storageUsecase) UploadFile(userId, accountId, documentType, contentTyp
 	switch strings.ToLower(documentType) {
 	case "ktp":
 		{
-			return su.userRepository.UpdateProfileKtpPhoto(&user_mobile.UserProfile{ID: userId, KtpPhoto: filePath})
+			return su.userRepository.UpdateProfileKtpPhoto(&model.UserProfile{ID: userId, KtpPhoto: filePath})
 		}
 	case "selfie":
 		{
-			return su.userRepository.UpdateProfileSelfiePhoto(&user_mobile.UserProfile{ID: userId, SelfiePhoto: filePath})
+			return su.userRepository.UpdateProfileSelfiePhoto(&model.UserProfile{ID: userId, SelfiePhoto: filePath})
 		}
 	case "npwp":
 		{
-			return su.userRepository.UpdateProfileNpwpPhoto(&user_mobile.UserProfile{ID: userId, NpwpPhoto: filePath})
+			return su.userRepository.UpdateProfileNpwpPhoto(&model.UserProfile{ID: userId, NpwpPhoto: filePath})
 		}
 	case "declaration":
 		{
-			return su.userRepository.UpdateProfileDeclarationVideo(&user_mobile.UserProfile{ID: userId, DeclarationVideo: filePath})
+			return su.userRepository.UpdateProfileDeclarationVideo(&model.UserProfile{ID: userId, DeclarationVideo: filePath})
 		}
 	case "deposit":
 		{
@@ -111,7 +110,7 @@ func (su *storageUsecase) UploadFile(userId, accountId, documentType, contentTyp
 		}
 	default:
 		{
-			return su.userRepository.UpdateProfileAdditionalDocumentPhoto(&user_mobile.UserProfile{ID: userId, AdditionalDocumentPhoto: filePath})
+			return su.userRepository.UpdateProfileAdditionalDocumentPhoto(&model.UserProfile{ID: userId, AdditionalDocumentPhoto: filePath})
 		}
 	}
 

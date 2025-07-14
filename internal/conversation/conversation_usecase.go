@@ -1,12 +1,12 @@
 package conversation
 
 import (
-	userBackoffice "arctfrex-customers/internal/user/backoffice"
-	userMobile "arctfrex-customers/internal/user/mobile"
 	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
+
+	"arctfrex-customers/internal/model"
 )
 
 type ConversationUsecase interface {
@@ -14,8 +14,8 @@ type ConversationUsecase interface {
 	GetConversationSessionBySessionID(conversationSessionId string) (*ConversationSession, error)
 	TakeConversationSessionBySessionID(conversationSessionId string, backOfficeUserID string) error
 	GetConversationSessionsByBackofficeUserID(backofficeUserID string) ([]ConversationSession, error)
-	GetUserByID(userId string) (*userMobile.Users, error)
-	GetBackofficeUserByID(userId string) (*userBackoffice.BackofficeUsers, error)
+	GetUserByID(userId string) (*model.Users, error)
+	GetBackofficeUserByID(userId string) (*model.BackofficeUsers, error)
 	CreateSession(conversationSession *ConversationSession) error
 	GetActiveSessionByUserID(userID string) (*ConversationSession, error)
 	GetSessionByID(sessionID string, session *ConversationSession) error
@@ -62,11 +62,11 @@ func (cu *conversationUsecase) GetConversationSessionsByBackofficeUserID(backoff
 	return cu.conversationRepository.GetConversationSessionsByBackofficeUserID(backofficeUserID)
 }
 
-func (cu *conversationUsecase) GetUserByID(userId string) (*userMobile.Users, error) {
+func (cu *conversationUsecase) GetUserByID(userId string) (*model.Users, error) {
 	return cu.conversationRepository.GetUserByID(userId)
 }
 
-func (cu *conversationUsecase) GetBackofficeUserByID(userId string) (*userBackoffice.BackofficeUsers, error) {
+func (cu *conversationUsecase) GetBackofficeUserByID(userId string) (*model.BackofficeUsers, error) {
 	return cu.conversationRepository.GetBackofficeUserByID(userId)
 }
 

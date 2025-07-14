@@ -20,8 +20,6 @@ import (
 	"arctfrex-customers/internal/otp"
 	"arctfrex-customers/internal/report"
 	"arctfrex-customers/internal/role"
-	backoffice "arctfrex-customers/internal/user/backoffice"
-	mobile "arctfrex-customers/internal/user/mobile"
 )
 
 // NewDB initializes a new database connection
@@ -54,14 +52,14 @@ func NewDB() *gorm.DB {
 
 	// Automatically migrate the schema of the User struct
 	err = db.AutoMigrate(
-		&mobile.Users{},
-		&mobile.UserProfile{},
-		&mobile.UserAddress{},
-		&mobile.UserEmployment{},
-		&mobile.UserFinance{},
-		&mobile.UserEmergencyContact{},
+		&model.Users{},
+		&model.UserProfile{},
+		&model.UserAddress{},
+		&model.UserEmployment{},
+		&model.UserFinance{},
+		&model.UserEmergencyContact{},
 		&otp.Otp{},
-		&backoffice.BackofficeUsers{},
+		&model.BackofficeUsers{},
 		&model.Market{},
 		&model.MarketCountry{},
 		&model.MarketCurrencyRate{},

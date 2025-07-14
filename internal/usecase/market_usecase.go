@@ -11,7 +11,6 @@ import (
 	"arctfrex-customers/internal/common"
 	"arctfrex-customers/internal/model"
 	"arctfrex-customers/internal/repository"
-	user_mobile "arctfrex-customers/internal/user/mobile"
 )
 
 type MarketUsecase interface {
@@ -26,13 +25,13 @@ type MarketUsecase interface {
 type marketUsecase struct {
 	marketRepository repository.MarketRepository
 	marketApiclient  api.MarketApiclient
-	userRepository   user_mobile.UserRepository
+	userRepository   repository.UserRepository
 }
 
 func NewMarketUsecase(
 	mr repository.MarketRepository,
 	ma api.MarketApiclient,
-	ur user_mobile.UserRepository,
+	ur repository.UserRepository,
 ) MarketUsecase {
 	return &marketUsecase{
 		marketRepository: mr,

@@ -1,8 +1,6 @@
-package user
+package usecase
 
 import (
-	"arctfrex-customers/internal/auth"
-	"arctfrex-customers/internal/common"
 	"errors"
 	"fmt"
 	"strings"
@@ -10,23 +8,28 @@ import (
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+
+	"arctfrex-customers/internal/auth"
+	"arctfrex-customers/internal/common"
+	"arctfrex-customers/internal/model"
+	"arctfrex-customers/internal/repository"
 )
 
 type BackofficeUserUsecase interface {
-	Register(backofficeUser *BackofficeUsers) error
-	LoginSession(backofficeUser *BackofficeUsers) (*BackofficeUserLoginSessionResponse, error)
-	All() (*[]BackofficeUsers, error)
-	AllUsersByRoleId(roleId string) ([]BackofficeUsers, error)
-	Subordinate(userId string) (*[]BackofficeUsers, error)
+	Register(backofficeUser *model.BackofficeUsers) error
+	LoginSession(backofficeUser *model.BackofficeUsers) (*model.BackofficeUserLoginSessionResponse, error)
+	All() (*[]model.BackofficeUsers, error)
+	AllUsersByRoleId(roleId string) ([]model.BackofficeUsers, error)
+	Subordinate(userId string) (*[]model.BackofficeUsers, error)
 }
 
 type backofficeUserUsecase struct {
-	backofficeUserRepository BackofficeUserRepository
+	backofficeUserRepository repository.BackofficeUserRepository
 	tokenService             auth.TokenService
 }
 
 func NewBackofficeUsecase(
-	bur BackofficeUserRepository,
+	bur repository.BackofficeUserRepository,
 	ts auth.TokenService,
 ) *backofficeUserUsecase {
 	return &backofficeUserUsecase{
@@ -35,7 +38,7 @@ func NewBackofficeUsecase(
 	}
 }
 
-func (buu *backofficeUserUsecase) Register(backofficeUser *BackofficeUsers) error {
+func (buu *backofficeUserUsecase) Register(backofficeUser *model.BackofficeUsers) error {
 	userdb, _ := buu.backofficeUserRepository.GetUserByEmail(backofficeUser.Email)
 	if userdb != nil {
 		return errors.New("email or phone number already used")
@@ -60,7 +63,7 @@ func (buu *backofficeUserUsecase) Register(backofficeUser *BackofficeUsers) erro
 	return buu.backofficeUserRepository.Create(backofficeUser)
 }
 
-func (buu *backofficeUserUsecase) LoginSession(backofficeUser *BackofficeUsers) (*BackofficeUserLoginSessionResponse, error) {
+func (buu *backofficeUserUsecase) LoginSession(backofficeUser *model.BackofficeUsers) (*model.BackofficeUserLoginSessionResponse, error) {
 	userdb, err := buu.backofficeUserRepository.GetUserByEmail(backofficeUser.Email)
 	if err != nil {
 		return nil, err
@@ -83,7 +86,7 @@ func (buu *backofficeUserUsecase) LoginSession(backofficeUser *BackofficeUsers) 
 		return nil, err
 	}
 
-	return &BackofficeUserLoginSessionResponse{
+	return &model.BackofficeUserLoginSessionResponse{
 		ID:           userdb.ID,
 		Name:         userdb.Name,
 		Email:        userdb.Email,
@@ -94,7 +97,7 @@ func (buu *backofficeUserUsecase) LoginSession(backofficeUser *BackofficeUsers) 
 	}, nil
 }
 
-func (buh *backofficeUserUsecase) All() (*[]BackofficeUsers, error) {
+func (buh *backofficeUserUsecase) All() (*[]model.BackofficeUsers, error) {
 	userdb, err := buh.backofficeUserRepository.GetActiveUsers()
 	if err != nil {
 		return nil, err
@@ -103,7 +106,7 @@ func (buh *backofficeUserUsecase) All() (*[]BackofficeUsers, error) {
 	return userdb, nil
 }
 
-func (buh *backofficeUserUsecase) AllUsersByRoleId(roleId string) ([]BackofficeUsers, error) {
+func (buh *backofficeUserUsecase) AllUsersByRoleId(roleId string) ([]model.BackofficeUsers, error) {
 	userdb, err := buh.backofficeUserRepository.GetActiveUsersByRoleId(roleId)
 	if err != nil {
 		return nil, err
@@ -112,7 +115,7 @@ func (buh *backofficeUserUsecase) AllUsersByRoleId(roleId string) ([]BackofficeU
 	return userdb, nil
 }
 
-func (buh *backofficeUserUsecase) Subordinate(userId string) (*[]BackofficeUsers, error) {
+func (buh *backofficeUserUsecase) Subordinate(userId string) (*[]model.BackofficeUsers, error) {
 	userdb, err := buh.backofficeUserRepository.GetActiveSubordinate(userId)
 	if err != nil {
 		return nil, err

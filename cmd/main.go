@@ -29,8 +29,6 @@ import (
 	"arctfrex-customers/internal/role"
 	"arctfrex-customers/internal/storage"
 	"arctfrex-customers/internal/usecase"
-	user_backoffice "arctfrex-customers/internal/user/backoffice"
-	user_mobile "arctfrex-customers/internal/user/mobile"
 	"arctfrex-customers/internal/whatsapp"
 )
 
@@ -46,6 +44,7 @@ func main() {
 	if err != nil {
 		return
 	}
+	common.InitSonyflake()
 
 	jwtSecretKey := os.Getenv(common.JWT_SECRET_KEY)
 	applicationName := os.Getenv(common.APPLICATION_NAME)
@@ -104,10 +103,10 @@ func main() {
 	twilioWhatsappSender := whatsapp.NewTwilioWhatsappSender()
 
 	//User
-	userApiClient := user_mobile.NewUserApiclient()
-	userRepository := user_mobile.NewUserRepository(db)
-	userUsecase := user_mobile.NewUserUseCase(userRepository, jwtService, userApiClient)
-	user_mobile.NewUserHandler(engine, jwtMiddleware, userUsecase)
+	userApiClient := api.NewUserApiclient()
+	userRepository := repository.NewUserRepository(db)
+	userUsecase := usecase.NewUserUseCase(userRepository, jwtService, userApiClient)
+	handler.NewUserHandler(engine, jwtMiddleware, userUsecase)
 
 	newsApiClient := news.NewNewsApiClient()
 	newsRepository := news.NewNewsRepository(db)
@@ -160,12 +159,12 @@ func main() {
 	workflowApproverRepository := repository.NewWorkflowApproverRepository(db)
 	backofficeDepositRepository := repository.NewDepositRepository(db)
 	backofficeWithdrawalRepository := repository.NewWithdrawalRepository(db)
-	backofficeUserRepository := user_backoffice.NewBackofficeUserRepository(db)
+	backofficeUserRepository := repository.NewBackofficeUserRepository(db)
 
 	//usecase
 	marketUsecase := usecase.NewMarketUsecase(marketRepository, marketApiClient, userRepository)
 	accountUsecase := usecase.NewAccountUsecase(accountRepository, accountApiclient)
-	backofficeUserUsecase := user_backoffice.NewBackofficeUsecase(backofficeUserRepository, jwtService)
+	backofficeUserUsecase := usecase.NewBackofficeUsecase(backofficeUserRepository, jwtService)
 	backofficeWithdrawalUsecase := usecase.NewWithdrawalUsecase(backofficeWithdrawalRepository, accountRepository, backofficeWithdrawalApiclient, marketRepository, workflowSettingRepository, workflowApproverRepository)
 	backofficeDepositUsecase := usecase.NewDepositUsecase(
 		backofficeDepositRepository,
@@ -192,7 +191,7 @@ func main() {
 	handler.NewDepositHandler(engine, jwtMiddleware, backofficeDepositUsecase)
 	handler.NewWithdrawalHandler(engine, jwtMiddleware, backofficeWithdrawalUsecase)
 	handler.NewWorkflowApproverHandler(engine, jwtMiddleware, workflowApproverUsecase)
-	user_backoffice.NewBackofficeHandler(engine, jwtMiddleware, backofficeUserUsecase)
+	handler.NewBackofficeHandler(engine, jwtMiddleware, backofficeUserUsecase)
 
 	// Worker to fetch market price every minute
 	marketPriceWorker := market.NewMarketWorker(marketUsecase)

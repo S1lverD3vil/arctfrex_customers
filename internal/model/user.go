@@ -1,17 +1,18 @@
-package user
+package model
 
 import (
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
-	"gorm.io/datatypes"
 	"gorm.io/gorm"
 
 	"arctfrex-customers/internal/base"
 	"arctfrex-customers/internal/common"
 	"arctfrex-customers/internal/common/enums"
-	"arctfrex-customers/internal/model"
 )
 
 type Users struct {
@@ -140,55 +141,68 @@ type UserEmploymentDetail struct {
 }
 
 type UserFinance struct {
-	ID                           string         `gorm:"primary_key" json:"userid"`
-	SourceIncome                 string         `json:"source_income"`
-	YearlyIncomeAmount           string         `json:"yearly_income_amount"`
-	YearlyAdditionalIncomeAmount string         `json:"yearly_additional_income_amount"`
-	EstimationWealthAmount       string         `json:"estimation_wealth_amount"`
-	TaxableObjectSalesValue      string         `json:"taxable_object_sales_value"`
-	Deposito                     string         `json:"deposito"`
-	Currency                     string         `json:"currency"`
-	BankName                     string         `json:"bank_name"`
-	BankBranch                   string         `json:"bank_branch"`
-	BankCity                     string         `json:"bank_city"`
-	BankAccountNumber            string         `json:"bank_account_number"`
-	BankBeneficiaryName          string         `json:"bank_beneficiary_name"`
-	BankAccountType              string         `json:"bank_account_type"`
-	BankPhone                    string         `json:"bank_phone"`
-	InvestmentGoals              string         `json:"investment_goals"`
-	InvestmentExperience         string         `json:"investment_experience"`
-	BankList                     datatypes.JSON `gorm:"type:jsonb" json:"bank_list"` // Column for the array of obj
-	CurrencyRate                 float64        `json:"currency_rate"`
-	ProductServicePlatform       string         `json:"product_service_platform"`
-	AccountType                  string         `json:"account_type"` // e.g., Personal, Joint, etc.
+	ID                           string   `gorm:"primary_key" json:"userid"`
+	SourceIncome                 string   `json:"source_income"`
+	YearlyIncomeAmount           string   `json:"yearly_income_amount"`
+	YearlyAdditionalIncomeAmount string   `json:"yearly_additional_income_amount"`
+	EstimationWealthAmount       string   `json:"estimation_wealth_amount"`
+	TaxableObjectSalesValue      string   `json:"taxable_object_sales_value"`
+	Deposito                     string   `json:"deposito"`
+	Currency                     string   `json:"currency"`
+	InvestmentGoals              string   `json:"investment_goals"`
+	InvestmentExperience         string   `json:"investment_experience"`
+	BankList                     BankList `gorm:"type:jsonb" json:"bank_list"` // Column for the array of obj
+	CurrencyRate                 float64  `json:"currency_rate"`
+	ProductServicePlatform       string   `json:"product_service_platform"`
+	AccountType                  string   `json:"account_type"` // e.g., Personal, Joint, etc.
 
 	base.BaseModel
 }
 
+type Bank struct {
+	BankName            string `json:"bank_name"`
+	BankBranch          string `json:"bank_branch"`
+	BankCity            string `json:"bank_city"`
+	BankAccountNumber   string `json:"bank_account_number"`
+	BankBeneficiaryName string `json:"bank_beneficiary_name"`
+	BankAccountType     string `json:"bank_account_type"`
+	BankPhone           string `json:"bank_phone"`
+}
+
+// Custom slice alias
+type BankList []Bank
+
+// Save to DB (jsonb)
+func (b BankList) Value() (driver.Value, error) {
+	return json.Marshal(b)
+}
+
+// Read from DB (jsonb)
+func (b *BankList) Scan(value interface{}) error {
+	bytes, ok := value.([]byte)
+	if !ok {
+		return errors.New("failed to assert value to []byte")
+	}
+	return json.Unmarshal(bytes, b)
+}
+
 type UserFinanceDetail struct {
-	UserID                       string         `json:"user_id"`
-	SourceIncome                 string         `json:"source_income"`
-	YearlyIncomeAmount           string         `json:"yearly_income_amount"`
-	YearlyAdditionalIncomeAmount string         `json:"yearly_additional_income_amount"`
-	EstimationWealthAmount       string         `json:"estimation_wealth_amount"`
-	TaxableObjectSalesValue      string         `json:"taxable_object_sales_value"`
-	Deposito                     string         `json:"deposito"`
-	Currency                     string         `json:"currency"`
-	BankName                     string         `json:"bank_name"`
-	BankBranch                   string         `json:"bank_branch"`
-	BankCity                     string         `json:"bank_city"`
-	BankAccountNumber            string         `json:"bank_account_number"`
-	BankBeneficiaryName          string         `json:"bank_beneficiary_name"`
-	BankAccountType              string         `json:"bank_account_type"`
-	BankPhone                    string         `json:"bank_phone"`
-	InvestmentGoals              string         `json:"investment_goals"`
-	InvestmentExperience         string         `json:"investment_experience"`
-	BankList                     datatypes.JSON `gorm:"type:jsonb" json:"bank_list"` // Column for the array of obj
-	CurrencyRate                 float64        `json:"currency_rate"`
-	ProductServicePlatform       string         `json:"product_service_platform"`
-	DomAddress                   string         `json:"dom_address"`
-	IdentityAddress              string         `json:"identity_address"`
-	AccountType                  string         `json:"account_type"` // e.g., Personal, Joint, etc.
+	UserID                       string   `json:"user_id"`
+	SourceIncome                 string   `json:"source_income"`
+	YearlyIncomeAmount           string   `json:"yearly_income_amount"`
+	YearlyAdditionalIncomeAmount string   `json:"yearly_additional_income_amount"`
+	EstimationWealthAmount       string   `json:"estimation_wealth_amount"`
+	TaxableObjectSalesValue      string   `json:"taxable_object_sales_value"`
+	Deposito                     string   `json:"deposito"`
+	Currency                     string   `json:"currency"`
+	InvestmentGoals              string   `json:"investment_goals"`
+	InvestmentExperience         string   `json:"investment_experience"`
+	BankList                     BankList `gorm:"type:jsonb" json:"bank_list"` // Column for the array of obj
+	CurrencyRate                 float64  `json:"currency_rate"`
+	ProductServicePlatform       string   `json:"product_service_platform"`
+	DomAddress                   string   `json:"dom_address"`
+	IdentityAddress              string   `json:"identity_address"`
+	AccountType                  string   `json:"account_type"` // e.g., Personal, Joint, etc.
 }
 
 type UserEmergencyContact struct {
@@ -244,7 +258,7 @@ func (u *Users) AfterCreate(tx *gorm.DB) (err error) {
 	if err != nil {
 		return err
 	}
-	if err := tx.Save(&model.Account{
+	if err := tx.Save(&Account{
 		ID:                common.UUIDNormalizer(accountID),
 		Type:              enums.AccountTypeDemo,
 		ApprovalStatus:    enums.AccountApprovalStatusApproved,
@@ -294,7 +308,7 @@ func (u *Users) AfterUpdateUserByMobilePhone(tx *gorm.DB) (err error) {
 	if err != nil {
 		return err
 	}
-	if err := tx.Save(&model.Account{
+	if err := tx.Save(&Account{
 		ID:                common.UUIDNormalizer(accountID),
 		Type:              enums.AccountTypeDemo,
 		ApprovalStatus:    enums.AccountApprovalStatusApproved,
@@ -351,72 +365,8 @@ type UserLoginSessionResponse struct {
 	// SessionId string `json:"session_id"`
 }
 
-//	type Transaction struct {
-//		ID        int     `json:"id"`
-//		UserID    int     `json:"user_id"`
-//		Amount    float64 `json:"amount"`
-//		Type      string  `json:"type"`
-//		CreatedAt string  `json:"created_at"`
-//	}
-type ClientAdd struct {
-	Login    int64  `json:"Login"`
-	Name     string `json:"Name"`
-	Password string `json:"Password"`
-	Group    string `json:"Group"`
-	Leverage int64  `json:"Leverage"`
-	Rights   int64  `json:"Rights"`
-	Email    string `json:"Email"`
-	Phone    string `json:"Phone"`
-}
-
-type DemoAccountTopUp struct {
-	Login  int64   `json:"Login"`
-	Amount float64 `json:"Amount"`
-	Result string  `json:"result"`
-}
-
 type UserApiResponse struct {
 	Message string `json:"message"`
 	Data    any    `json:"data"`
 	Time    string `json:"time"`
 }
-
-type UserRepository interface {
-	Create(user *Users) error
-	Save(user *Users) error
-
-	GetUserByEmail(email string) (*Users, error)
-	GetActiveUserByUserId(userId string) (*Users, error)
-	GetActiveUserByUserIdSessionId(userId, sessionId string) (*Users, error)
-	GetActiveUserProfileByUserId(userId string) (*UserProfile, error)
-	GetActiveUserProfileDetailByUserID(userID string) (*UserProfileDetail, error)
-	GetActiveUserAddressByUserId(userId string) (*UserAddress, error)
-	GetActiveUserEmploymentByUserId(userId string) (*UserEmployment, error)
-	GetActiveUserFinanceByUserId(userId string) (*UserFinanceDetail, error)
-	GetActiveUserEmergencyContactByUserId(userId string) (*UserEmergencyContact, error)
-	GetActiveUserByMobilePhone(mobilePhone string) (*Users, error)
-	GetUserByEmailAndMobilePhone(email, mobilePhone string) (*Users, error)
-	GetUserByMobilePhone(mobilePhone string) (*Users, error)
-	GetUserByEmailOrMobilePhone(email, mobilePhone string) (*Users, error)
-	GetActiveUserLeads() (*[]BackOfficeUserLeads, error)
-
-	Update(user *Users) error
-	UpdateUserByMobilePhone(user *Users) error
-	UpdateUserWatchlist(user *Users) error
-	UpdateProfile(userProfile *UserProfile) error
-	UpdateLogoutSession(user *Users) error
-	UpdateDeleteUser(user *Users) error
-	UpdateProfileKtpPhoto(userProfile *UserProfile) error
-	UpdateProfileSelfiePhoto(userProfile *UserProfile) error
-	UpdateProfileNpwpPhoto(userProfile *UserProfile) error
-	UpdateProfileAdditionalDocumentPhoto(userProfile *UserProfile) error
-	UpdateProfileDeclarationVideo(userProfile *UserProfile) error
-	UpdateAddress(userAddress *UserAddress) error
-	UpdateEmployment(userEmployment *UserEmployment) error
-	UpdateFinance(userFinance *UserFinance) error
-	UpdateEmergencyContact(userEmergencyContact *UserEmergencyContact) error
-}
-
-// func (Transaction) TableName() string {
-// 	return "users.Transaction"
-// }

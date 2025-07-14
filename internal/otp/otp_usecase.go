@@ -6,12 +6,12 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/pquerna/otp/totp"
+
 	"arctfrex-customers/internal/common"
 	"arctfrex-customers/internal/email"
-	user "arctfrex-customers/internal/user/mobile"
+	"arctfrex-customers/internal/repository"
 	"arctfrex-customers/internal/whatsapp"
-
-	"github.com/pquerna/otp/totp"
 )
 
 type OtpUsecase interface {
@@ -21,14 +21,14 @@ type OtpUsecase interface {
 
 type otpUsecase struct {
 	otpRepository        OtpRepository
-	userRepository       user.UserRepository
+	userRepository       repository.UserRepository
 	twilioWhatsappSender whatsapp.TwilioWhatsappSender
 	gomailSender         email.GomailSender
 }
 
 func NewOtpUseCase(
 	or OtpRepository,
-	us user.UserRepository,
+	us repository.UserRepository,
 	tws whatsapp.TwilioWhatsappSender,
 	gs email.GomailSender,
 ) *otpUsecase {

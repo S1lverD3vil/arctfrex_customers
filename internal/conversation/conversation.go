@@ -2,8 +2,7 @@ package conversation
 
 import (
 	"arctfrex-customers/internal/base"
-	userBackoffice "arctfrex-customers/internal/user/backoffice"
-	userMobile "arctfrex-customers/internal/user/mobile"
+	"arctfrex-customers/internal/model"
 )
 
 const (
@@ -20,8 +19,8 @@ type ConversationSession struct {
 	Messages         []ConversationMessage `gorm:"foreignKey:SessionID" json:"messages"` // Messages in the session
 	CurrentStepID    string                `json:"current_step_id"`                      // Tracks the current step of the conversation
 
-	User           *userMobile.Users               `gorm:"-" json:"user"`
-	BackofficeUser *userBackoffice.BackofficeUsers `gorm:"-" json:"backoffice_user"`
+	User           *model.Users           `gorm:"-" json:"user"`
+	BackofficeUser *model.BackofficeUsers `gorm:"-" json:"backoffice_user"`
 
 	base.BaseModel
 }
@@ -64,8 +63,8 @@ type ConversationRepository interface {
 	GetConversationSessionBySessionID(conversationSessionId string) (*ConversationSession, error)
 	TakeConversationSessionBySessionID(conversationSessionId string, backOfficeUserID string) error
 	GetConversationSessionsByBackofficeUserID(backofficeUserID string) ([]ConversationSession, error)
-	GetUserByID(userId string) (*userMobile.Users, error)
-	GetBackofficeUserByID(userId string) (*userBackoffice.BackofficeUsers, error)
+	GetUserByID(userId string) (*model.Users, error)
+	GetBackofficeUserByID(userId string) (*model.BackofficeUsers, error)
 	CreateSession(conversation *ConversationSession) error
 	GetActiveSessionByUserID(userID string) (*ConversationSession, error)
 	GetSessionByID(sessionID string, session *ConversationSession) error

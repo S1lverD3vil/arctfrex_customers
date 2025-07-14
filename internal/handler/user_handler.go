@@ -1,4 +1,4 @@
-package user
+package handler
 
 import (
 	"log"
@@ -8,19 +8,21 @@ import (
 
 	"arctfrex-customers/internal/base"
 	"arctfrex-customers/internal/middleware"
+	"arctfrex-customers/internal/model"
+	"arctfrex-customers/internal/usecase"
 )
 
 // userHandler handles HTTP requests for user operations
 type userHandler struct {
 	jwtMiddleware *middleware.JWTMiddleware
-	userUsecase   UserUsecase
+	userUsecase   usecase.UserUsecase
 }
 
 // NewUserHandler sets up the HTTP handlers for user operations
 func NewUserHandler(
 	engine *gin.Engine,
 	jmw *middleware.JWTMiddleware,
-	uu *userUsecase,
+	uu usecase.UserUsecase,
 ) *userHandler {
 	handler := &userHandler{
 		jwtMiddleware: jmw,
@@ -71,7 +73,7 @@ func NewUserHandler(
 
 // CreateUser handles the creation of a new user
 func (uh *userHandler) Register(c *gin.Context) {
-	var user Users
+	var user model.Users
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -103,7 +105,7 @@ func (uh *userHandler) Check(c *gin.Context) {
 }
 
 func (uh *userHandler) LoginSession(c *gin.Context) {
-	var user *UserLoginSessionRequest
+	var user *model.UserLoginSessionRequest
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -118,13 +120,13 @@ func (uh *userHandler) LoginSession(c *gin.Context) {
 }
 
 func (uh *userHandler) Session(c *gin.Context) {
-	var user *UserSessionRequest
+	var user *model.UserSessionRequest
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	_, err := uh.userUsecase.Session(&Users{SessionId: user.SessionId, DeviceId: user.DeviceId})
+	_, err := uh.userUsecase.Session(&model.Users{SessionId: user.SessionId, DeviceId: user.DeviceId})
 	if err != nil {
 		c.Status(http.StatusForbidden)
 		return
@@ -134,13 +136,13 @@ func (uh *userHandler) Session(c *gin.Context) {
 }
 
 func (uh *userHandler) LogoutSession(c *gin.Context) {
-	var user *UserSessionRequest
+	var user *model.UserSessionRequest
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	err := uh.userUsecase.LogoutSession(&Users{SessionId: user.SessionId, DeviceId: user.DeviceId})
+	err := uh.userUsecase.LogoutSession(&model.Users{SessionId: user.SessionId, DeviceId: user.DeviceId})
 	if err != nil {
 		c.Status(http.StatusBadRequest)
 		return
@@ -163,7 +165,7 @@ func (uh *userHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	err := uh.userUsecase.Delete(&Users{ID: userId})
+	err := uh.userUsecase.Delete(&model.Users{ID: userId})
 	if err != nil {
 		c.Status(http.StatusBadRequest)
 		return
@@ -173,7 +175,7 @@ func (uh *userHandler) Delete(c *gin.Context) {
 }
 
 func (uh *userHandler) UpdatePin(c *gin.Context) {
-	var user *UpdatePinRequest
+	var user *model.UpdatePinRequest
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -201,7 +203,7 @@ func (uh *userHandler) UpdateProfile(c *gin.Context) {
 		return
 	}
 
-	var userProfile *UserProfile
+	var userProfile *model.UserProfile
 	if err := c.ShouldBindJSON(&userProfile); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -247,7 +249,7 @@ func (uh *userHandler) BackOfficeCustomersGetProfile(c *gin.Context) {
 }
 
 func (uh *userHandler) BackOfficeCustomersUpdateProfile(c *gin.Context) {
-	var userProfile *UserProfile
+	var userProfile *model.UserProfile
 	if err := c.ShouldBindJSON(&userProfile); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -275,7 +277,7 @@ func (uh *userHandler) UpdateAddress(c *gin.Context) {
 		log.Println("userID is not of type string")
 	}
 
-	var userAddress *UserAddress
+	var userAddress *model.UserAddress
 	if err := c.ShouldBindJSON(&userAddress); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -321,7 +323,7 @@ func (uh *userHandler) BackOfficeCustomersGetAddress(c *gin.Context) {
 }
 
 func (uh *userHandler) BackOfficeCustomersUpdateAddress(c *gin.Context) {
-	var userAddress *UserAddress
+	var userAddress *model.UserAddress
 	if err := c.ShouldBindJSON(&userAddress); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -348,7 +350,7 @@ func (uh *userHandler) UpdateEmployment(c *gin.Context) {
 		log.Println("userID is not of type string")
 	}
 
-	var userEmployment *UserEmployment
+	var userEmployment *model.UserEmployment
 	if err := c.ShouldBindJSON(&userEmployment); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -395,7 +397,7 @@ func (uh *userHandler) BackOfficeCustomersGetEmployment(c *gin.Context) {
 }
 
 func (uh *userHandler) BackOfficeCustomersUpdateEmployment(c *gin.Context) {
-	var userEmployment *UserEmployment
+	var userEmployment *model.UserEmployment
 	if err := c.ShouldBindJSON(&userEmployment); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -422,7 +424,7 @@ func (uh *userHandler) UpdateFinance(c *gin.Context) {
 		log.Println("userID is not of type string")
 	}
 
-	var userFinance *UserFinance
+	var userFinance *model.UserFinance
 	if err := c.ShouldBindJSON(&userFinance); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -433,7 +435,10 @@ func (uh *userHandler) UpdateFinance(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusOK)
+	c.JSON(
+		http.StatusOK,
+		base.ApiResponse{Message: "success", Data: userFinance},
+	)
 }
 
 func (uh *userHandler) GetFinance(c *gin.Context) {
@@ -470,7 +475,7 @@ func (uh *userHandler) BackOfficeCustomersGetFinance(c *gin.Context) {
 }
 
 func (uh *userHandler) BackOfficeCustomersUpdateFinance(c *gin.Context) {
-	var userFinance *UserFinance
+	var userFinance *model.UserFinance
 	if err := c.ShouldBindJSON(&userFinance); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -497,7 +502,7 @@ func (uh *userHandler) UpdateEmergencyContact(c *gin.Context) {
 		log.Println("userID is not of type string")
 	}
 
-	var userEmergencyContact *UserEmergencyContact
+	var userEmergencyContact *model.UserEmergencyContact
 	if err := c.ShouldBindJSON(&userEmergencyContact); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -543,7 +548,7 @@ func (uh *userHandler) BackOfficeCustomersGetEmergencyContact(c *gin.Context) {
 }
 
 func (uh *userHandler) BackOfficeCustomersUpdateEmergencyContact(c *gin.Context) {
-	var userEmergencyContact *UserEmergencyContact
+	var userEmergencyContact *model.UserEmergencyContact
 	if err := c.ShouldBindJSON(&userEmergencyContact); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -565,6 +570,6 @@ func (uh *userHandler) BackOfficeLeads(c *gin.Context) {
 	}
 	c.JSON(
 		http.StatusOK,
-		UserApiResponse{Message: "success", Data: backOfficeUserLeads},
+		base.ApiResponse{Message: "success", Data: backOfficeUserLeads},
 	)
 }

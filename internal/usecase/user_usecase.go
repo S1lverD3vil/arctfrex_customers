@@ -1,4 +1,4 @@
-package user
+package usecase
 
 import (
 	"errors"
@@ -10,42 +10,45 @@ import (
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 
+	"arctfrex-customers/internal/api"
 	"arctfrex-customers/internal/auth"
 	"arctfrex-customers/internal/common"
+	"arctfrex-customers/internal/model"
+	"arctfrex-customers/internal/repository"
 )
 
 type UserUsecase interface {
-	Register(user *Users) error
-	Check(mobilePhone string) (*Users, error)
-	LoginSession(user *UserLoginSessionRequest) (*UserLoginSessionResponse, error)
+	Register(user *model.Users) error
+	Check(mobilePhone string) (*model.Users, error)
+	LoginSession(user *model.UserLoginSessionRequest) (*model.UserLoginSessionResponse, error)
 	// LoginSession(mobilePhone, password, deviceId string) (*UserLoginSessionResponse, error)
-	Session(user *Users) (*Users, error)
-	LogoutSession(user *Users) error
-	Delete(user *Users) error
+	Session(user *model.Users) (*model.Users, error)
+	LogoutSession(user *model.Users) error
+	Delete(user *model.Users) error
 	UpdatePin(mobilePhone, pin string) error
-	UpdateProfile(userID string, userProfile *UserProfile) error
-	GetProfile(userID string) (*UserProfileDetail, error)
-	UpdateAddress(userID string, userAddress *UserAddress) error
-	GetAddress(userID string) (*UserAddress, error)
-	UpdateEmployment(userID string, userEmployment *UserEmployment) error
-	GetEmployment(userID string) (*UserEmploymentDetail, error)
-	UpdateFinance(userID string, userFinance *UserFinance) error
-	GetFinance(userID string) (*UserFinanceDetail, error)
-	UpdateEmergencyContact(userID string, userEmegencyContact *UserEmergencyContact) error
-	GetEmergencyContact(userID string) (*UserEmergencyContact, error)
-	BackOfficeGetLeads() (*[]BackOfficeUserLeads, error)
+	UpdateProfile(userID string, userProfile *model.UserProfile) error
+	GetProfile(userID string) (*model.UserProfileDetail, error)
+	UpdateAddress(userID string, userAddress *model.UserAddress) error
+	GetAddress(userID string) (*model.UserAddress, error)
+	UpdateEmployment(userID string, userEmployment *model.UserEmployment) error
+	GetEmployment(userID string) (*model.UserEmploymentDetail, error)
+	UpdateFinance(userID string, userFinance *model.UserFinance) error
+	GetFinance(userID string) (*model.UserFinanceDetail, error)
+	UpdateEmergencyContact(userID string, userEmegencyContact *model.UserEmergencyContact) error
+	GetEmergencyContact(userID string) (*model.UserEmergencyContact, error)
+	BackOfficeGetLeads() (*[]model.BackOfficeUserLeads, error)
 }
 
 type userUsecase struct {
-	userRepository UserRepository
+	userRepository repository.UserRepository
 	tokenService   auth.TokenService
-	userApiclient  UserApiclient
+	userApiclient  api.UserApiclient
 }
 
 func NewUserUseCase(
-	ur UserRepository,
+	ur repository.UserRepository,
 	ts auth.TokenService,
-	ua UserApiclient,
+	ua api.UserApiclient,
 ) *userUsecase {
 	return &userUsecase{
 		userRepository: ur,
@@ -54,7 +57,7 @@ func NewUserUseCase(
 	}
 }
 
-func (uu *userUsecase) Register(user *Users) error {
+func (uu *userUsecase) Register(user *model.Users) error {
 	user.Email = strings.ToLower(user.Email)
 	userdb, _ := uu.userRepository.GetUserByMobilePhone(user.MobilePhone)
 	// userdb, _ := uu.userRepository.GetUserByEmailAndMobilePhone(user.Email, user.MobilePhone)
@@ -107,14 +110,14 @@ func (uu *userUsecase) Register(user *Users) error {
 		// fmt.Println(userdb)
 	}
 
-	var clientAdd ClientAdd
+	var clientAdd model.ClientAdd
 	//Registering demo account to mt5
 	if user.MetaLoginId == 0 {
 		securedPassword, err := common.GenerateSecurePassword()
 		if err != nil {
 			return err
 		}
-		clientAdd = ClientAdd{
+		clientAdd = model.ClientAdd{
 			Name:     user.Name,
 			Password: securedPassword,
 			Group:    "demo\\PKB\\B-USD-SFL-MAR-C5-SWAP",
@@ -128,7 +131,7 @@ func (uu *userUsecase) Register(user *Users) error {
 			return err
 		}
 
-		demoAccountTopUp := DemoAccountTopUp{
+		demoAccountTopUp := model.DemoAccountTopUp{
 			Login:  clientAddData.Login,
 			Amount: 1000,
 		}
@@ -172,7 +175,7 @@ func (uu *userUsecase) Register(user *Users) error {
 // 200 -> input pin
 // 400 -> create pin
 // 402 -> signup
-func (uu *userUsecase) Check(mobilePhone string) (*Users, error) {
+func (uu *userUsecase) Check(mobilePhone string) (*model.Users, error) {
 	user, err := uu.userRepository.GetActiveUserByMobilePhone(mobilePhone)
 	// user, err := uu.userRepository.GetUserByMobilePhone(mobilePhone)
 
@@ -183,7 +186,7 @@ func (uu *userUsecase) Check(mobilePhone string) (*Users, error) {
 	return user, nil
 }
 
-func (uu *userUsecase) LoginSession(user *UserLoginSessionRequest) (*UserLoginSessionResponse, error) {
+func (uu *userUsecase) LoginSession(user *model.UserLoginSessionRequest) (*model.UserLoginSessionResponse, error) {
 	// LoginSession(mobilePhone, pin, deviceId string) (*UserLoginSessionResponse, error) {
 	userdb, err := uu.userRepository.GetActiveUserByMobilePhone(user.MobilePhone)
 	if err != nil {
@@ -215,7 +218,7 @@ func (uu *userUsecase) LoginSession(user *UserLoginSessionRequest) (*UserLoginSe
 		return nil, err
 	}
 
-	return &UserLoginSessionResponse{
+	return &model.UserLoginSessionResponse{
 		Name:             userdb.Name,
 		Email:            userdb.Email,
 		AccessToken:      generatedToken,
@@ -224,7 +227,7 @@ func (uu *userUsecase) LoginSession(user *UserLoginSessionRequest) (*UserLoginSe
 	}, err
 }
 
-func (uu *userUsecase) Session(user *Users) (*Users, error) {
+func (uu *userUsecase) Session(user *model.Users) (*model.Users, error) {
 	//	fmt.Printf("User Before: %+v\n", user)
 	userdb, err := uu.userRepository.GetActiveUserByUserIdSessionId(user.ID, user.SessionId)
 	if err != nil {
@@ -244,7 +247,7 @@ func (uu *userUsecase) Session(user *Users) (*Users, error) {
 	return userdb, nil
 }
 
-func (uu *userUsecase) LogoutSession(user *Users) error {
+func (uu *userUsecase) LogoutSession(user *model.Users) error {
 	user, err := uu.userRepository.GetActiveUserByUserIdSessionId(user.ID, user.SessionId)
 	if err != nil {
 		return errors.New("unauthorized")
@@ -255,7 +258,7 @@ func (uu *userUsecase) LogoutSession(user *Users) error {
 	return uu.userRepository.UpdateLogoutSession(user)
 }
 
-func (uu *userUsecase) Delete(user *Users) error {
+func (uu *userUsecase) Delete(user *model.Users) error {
 	user, err := uu.userRepository.GetActiveUserByUserId(user.ID)
 	if err != nil {
 		return errors.New("unauthorized")
@@ -284,7 +287,7 @@ func (uu *userUsecase) UpdatePin(mobilePhone, pin string) error {
 	return uu.userRepository.Update(user)
 }
 
-func (uu *userUsecase) UpdateProfile(userID string, userProfile *UserProfile) error {
+func (uu *userUsecase) UpdateProfile(userID string, userProfile *model.UserProfile) error {
 	user, err := uu.userRepository.GetActiveUserByUserId(userID)
 	if user == nil || err != nil {
 		return errors.New("user not found")
@@ -296,7 +299,7 @@ func (uu *userUsecase) UpdateProfile(userID string, userProfile *UserProfile) er
 	return uu.userRepository.UpdateProfile(userProfile)
 }
 
-func (uu *userUsecase) GetProfile(userID string) (*UserProfileDetail, error) {
+func (uu *userUsecase) GetProfile(userID string) (*model.UserProfileDetail, error) {
 
 	userProfile, err := uu.userRepository.GetActiveUserProfileDetailByUserID(userID)
 	if userProfile == nil || err != nil {
@@ -306,7 +309,7 @@ func (uu *userUsecase) GetProfile(userID string) (*UserProfileDetail, error) {
 	return userProfile, nil
 }
 
-func (uu *userUsecase) UpdateAddress(userID string, userAddress *UserAddress) error {
+func (uu *userUsecase) UpdateAddress(userID string, userAddress *model.UserAddress) error {
 	user, err := uu.userRepository.GetActiveUserByUserId(userID)
 	if user == nil || err != nil {
 		return errors.New("user not found")
@@ -318,7 +321,7 @@ func (uu *userUsecase) UpdateAddress(userID string, userAddress *UserAddress) er
 	return uu.userRepository.UpdateAddress(userAddress)
 }
 
-func (uu *userUsecase) GetAddress(userID string) (*UserAddress, error) {
+func (uu *userUsecase) GetAddress(userID string) (*model.UserAddress, error) {
 	userAddress, err := uu.userRepository.GetActiveUserAddressByUserId(userID)
 	if userAddress == nil || err != nil {
 		return nil, errors.New("user not found")
@@ -327,7 +330,7 @@ func (uu *userUsecase) GetAddress(userID string) (*UserAddress, error) {
 	return userAddress, nil
 }
 
-func (uu *userUsecase) UpdateEmployment(userID string, userEmployment *UserEmployment) error {
+func (uu *userUsecase) UpdateEmployment(userID string, userEmployment *model.UserEmployment) error {
 	user, err := uu.userRepository.GetActiveUserByUserId(userID)
 	if user == nil || err != nil {
 		return errors.New("user not found")
@@ -339,13 +342,13 @@ func (uu *userUsecase) UpdateEmployment(userID string, userEmployment *UserEmplo
 	return uu.userRepository.UpdateEmployment(userEmployment)
 }
 
-func (uu *userUsecase) GetEmployment(userID string) (*UserEmploymentDetail, error) {
+func (uu *userUsecase) GetEmployment(userID string) (*model.UserEmploymentDetail, error) {
 	userEmployment, err := uu.userRepository.GetActiveUserEmploymentByUserId(userID)
 	if userEmployment == nil || err != nil {
 		return nil, errors.New("user not found")
 	}
 
-	data := &UserEmploymentDetail{
+	data := &model.UserEmploymentDetail{
 		UserID:            userEmployment.ID,
 		CompanyName:       userEmployment.CompanyName,
 		CompanyAddress:    userEmployment.CompanyAddress,
@@ -362,7 +365,7 @@ func (uu *userUsecase) GetEmployment(userID string) (*UserEmploymentDetail, erro
 	return data, nil
 }
 
-func (uu *userUsecase) UpdateFinance(userID string, userFinance *UserFinance) error {
+func (uu *userUsecase) UpdateFinance(userID string, userFinance *model.UserFinance) error {
 	user, err := uu.userRepository.GetActiveUserByUserId(userID)
 	if user == nil || err != nil {
 		return errors.New("user not found")
@@ -374,7 +377,7 @@ func (uu *userUsecase) UpdateFinance(userID string, userFinance *UserFinance) er
 	return uu.userRepository.UpdateFinance(userFinance)
 }
 
-func (uu *userUsecase) GetFinance(userID string) (*UserFinanceDetail, error) {
+func (uu *userUsecase) GetFinance(userID string) (*model.UserFinanceDetail, error) {
 	userFinance, err := uu.userRepository.GetActiveUserFinanceByUserId(userID)
 	if userFinance == nil || err != nil {
 		return nil, errors.New("user not found")
@@ -383,7 +386,7 @@ func (uu *userUsecase) GetFinance(userID string) (*UserFinanceDetail, error) {
 	return userFinance, nil
 }
 
-func (uu *userUsecase) UpdateEmergencyContact(userID string, userEmegencyContact *UserEmergencyContact) error {
+func (uu *userUsecase) UpdateEmergencyContact(userID string, userEmegencyContact *model.UserEmergencyContact) error {
 	user, err := uu.userRepository.GetActiveUserByUserId(userID)
 	if user == nil || err != nil {
 		return errors.New("user not found")
@@ -395,7 +398,7 @@ func (uu *userUsecase) UpdateEmergencyContact(userID string, userEmegencyContact
 	return uu.userRepository.UpdateEmergencyContact(userEmegencyContact)
 }
 
-func (uu *userUsecase) GetEmergencyContact(userID string) (*UserEmergencyContact, error) {
+func (uu *userUsecase) GetEmergencyContact(userID string) (*model.UserEmergencyContact, error) {
 	userEmergencyContact, err := uu.userRepository.GetActiveUserEmergencyContactByUserId(userID)
 	if userEmergencyContact == nil || err != nil {
 		return nil, errors.New("user not found")
@@ -404,7 +407,7 @@ func (uu *userUsecase) GetEmergencyContact(userID string) (*UserEmergencyContact
 	return userEmergencyContact, nil
 }
 
-func (uu *userUsecase) BackOfficeGetLeads() (*[]BackOfficeUserLeads, error) {
+func (uu *userUsecase) BackOfficeGetLeads() (*[]model.BackOfficeUserLeads, error) {
 	backOfficeUserLeads, err := uu.userRepository.GetActiveUserLeads()
 
 	return backOfficeUserLeads, err

@@ -1,8 +1,6 @@
 package conversation
 
 import (
-	userBackoffice "arctfrex-customers/internal/user/backoffice"
-	userMobile "arctfrex-customers/internal/user/mobile"
 	"errors"
 	"fmt"
 	"log"
@@ -10,6 +8,8 @@ import (
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+
+	"arctfrex-customers/internal/model"
 )
 
 type conversationRepository struct {
@@ -31,14 +31,14 @@ func (cr *conversationRepository) GetConversationSessions() ([]ConversationSessi
 	// Now, manually load the related user and backoffice user data
 	for i := range sessions {
 		// Load the user data by MobilePhone or other reference
-		var user userMobile.Users
+		var user model.Users
 		if sessions[i].UserID != "" {
 			cr.db.Where("id = ?", sessions[i].UserID).First(&user)
 			sessions[i].User = &user
 		}
 
 		// Load the backoffice user data
-		var backofficeUser userBackoffice.BackofficeUsers
+		var backofficeUser model.BackofficeUsers
 		if sessions[i].BackofficeUserID != "" {
 			cr.db.Where("id = ?", sessions[i].BackofficeUserID).First(&backofficeUser)
 			sessions[i].BackofficeUser = &backofficeUser
@@ -59,14 +59,14 @@ func (cr *conversationRepository) GetConversationSessionsByBackofficeUserID(back
 	// Now, manually load the related user and backoffice user data
 	for i := range sessions {
 		// Load the user data by MobilePhone or other reference
-		var user userMobile.Users
+		var user model.Users
 		if sessions[i].UserID != "" {
 			cr.db.Where("id = ?", sessions[i].UserID).First(&user)
 			sessions[i].User = &user
 		}
 
 		// Load the backoffice user data
-		var backofficeUser userBackoffice.BackofficeUsers
+		var backofficeUser model.BackofficeUsers
 		if sessions[i].BackofficeUserID != "" {
 			cr.db.Where("id = ?", sessions[i].BackofficeUserID).First(&backofficeUser)
 			sessions[i].BackofficeUser = &backofficeUser
@@ -86,12 +86,12 @@ func (cr *conversationRepository) GetConversationSessionBySessionID(conversation
 	}
 
 	// Load the user data by MobilePhone or other reference
-	var user userMobile.Users
+	var user model.Users
 	cr.db.Where("id = ?", session.UserID).First(&user)
 	session.User = &user
 
 	// Load the backoffice user data
-	var backofficeUser userBackoffice.BackofficeUsers
+	var backofficeUser model.BackofficeUsers
 	cr.db.Where("id = ?", session.BackofficeUserID).First(&backofficeUser)
 	session.BackofficeUser = &backofficeUser
 
@@ -107,16 +107,16 @@ func (cr *conversationRepository) TakeConversationSessionBySessionID(conversatio
 	return cr.db.Model(&conversationSession).Where("id = ?", conversationSessionId).Update("backoffice_user_id", backOfficeUserID).Error
 }
 
-func (cr *conversationRepository) GetUserByID(id string) (*userMobile.Users, error) {
-	var user userMobile.Users
+func (cr *conversationRepository) GetUserByID(id string) (*model.Users, error) {
+	var user model.Users
 	if err := cr.db.First(&user, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
 }
 
-func (cr *conversationRepository) GetBackofficeUserByID(id string) (*userBackoffice.BackofficeUsers, error) {
-	var userBackoffice userBackoffice.BackofficeUsers
+func (cr *conversationRepository) GetBackofficeUserByID(id string) (*model.BackofficeUsers, error) {
+	var userBackoffice model.BackofficeUsers
 	if err := cr.db.First(&userBackoffice, "id = ?", id).Error; err != nil {
 		return nil, err
 	}

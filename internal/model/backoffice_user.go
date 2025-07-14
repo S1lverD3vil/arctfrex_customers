@@ -1,4 +1,4 @@
-package user
+package model
 
 import (
 	"gorm.io/gorm"
@@ -53,14 +53,4 @@ type BackofficeUserApiResponse struct {
 	Message string `json:"message"`
 	Data    any    `json:"data"`
 	Time    string `json:"time"`
-}
-
-type BackofficeUserRepository interface {
-	Create(backofficeUser *BackofficeUsers) error
-	GetUserByEmail(email string) (*BackofficeUsers, error)
-	GetActiveUsers() (*[]BackofficeUsers, error)
-	Update(user *BackofficeUsers) error
-	GetActiveSubordinate(userId string) (*[]BackofficeUsers, error)
-	GetActiveUsersByRoleId(roleId string) ([]BackofficeUsers, error)
-	GetUserByUserId(userID string) (*BackofficeUsers, error)
 }

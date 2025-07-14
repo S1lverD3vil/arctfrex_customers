@@ -1,7 +1,6 @@
-package user
+package api
 
 import (
-	"arctfrex-customers/internal/common"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -10,11 +9,14 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	"arctfrex-customers/internal/common"
+	"arctfrex-customers/internal/model"
 )
 
 type UserApiclient interface {
-	ClientAdd(clientAdd ClientAdd) (ClientAdd, error)
-	DemoAccountTopUp(demoAccountTopUp DemoAccountTopUp) (DemoAccountTopUp, error)
+	ClientAdd(clientAdd model.ClientAdd) (model.ClientAdd, error)
+	DemoAccountTopUp(demoAccountTopUp model.DemoAccountTopUp) (model.DemoAccountTopUp, error)
 }
 
 type userApiclient struct{}
@@ -23,8 +25,8 @@ func NewUserApiclient() UserApiclient {
 	return &userApiclient{}
 }
 
-func (s *userApiclient) ClientAdd(clientAdd ClientAdd) (ClientAdd, error) {
-	var clientAddData ClientAdd
+func (s *userApiclient) ClientAdd(clientAdd model.ClientAdd) (model.ClientAdd, error) {
+	var clientAddData model.ClientAdd
 
 	// Convert the request body to JSON
 	jsonBody, err := json.Marshal(clientAdd)
@@ -78,8 +80,8 @@ func (s *userApiclient) ClientAdd(clientAdd ClientAdd) (ClientAdd, error) {
 	return clientAddData, nil
 }
 
-func (s *userApiclient) DemoAccountTopUp(demoAccountTopUp DemoAccountTopUp) (DemoAccountTopUp, error) {
-	var demoAccountTopUpData DemoAccountTopUp
+func (s *userApiclient) DemoAccountTopUp(demoAccountTopUp model.DemoAccountTopUp) (model.DemoAccountTopUp, error) {
+	var demoAccountTopUpData model.DemoAccountTopUp
 
 	// Convert the request body to JSON
 	jsonBody, err := json.Marshal(demoAccountTopUp)
