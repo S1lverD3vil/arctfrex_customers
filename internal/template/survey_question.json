@@ -1,0 +1,110 @@
+{
+    "survey_checklist": [
+        {
+            "no": 1,
+            "question": "Apakah benar <strong>Bapak/Ibu</strong> meregistrasi<br/> sendiri pembukaan akun di <b>PT. PANEN KAPITAL BERJANGKA</b> ?<span style='color: red;text-decoration: underline'>JAWABAN HARUS</span>"
+        },
+        {
+            "no": 2,
+            "question": "Tolong di sebutkan No HP yang sedang<br/>digunakan saat ini <b>{{.PhoneNumber}}</b>"
+        },
+        {
+            "no": 3,
+            "question": "Sebutkan No. KTP <b>{{.NoIdentity}}</b>"
+        },
+        {
+            "no": 4,
+            "question": "Tolong di sebutkan Alamat Sesuai KTP <b>{{.Address}} Kota : {{.DomProvince}}</b>"
+        },
+        {
+            "no": 5,
+            "question": "Bisa disebutkan pekerjaan <b>Bapak/Ibu</b> saat ini <b>{{.Profession}}</b>"
+        },
+        {
+            "no": 6,
+            "question": "Bisa disebutkan nama Ibu Kandung <b>{{.MotherName}}<b>"
+        },
+        {
+            "no": 7,
+            "question": "Alamat email pribadi (dieja) <b>{{.Email}}</b><br/>Karena ke email tsb akan terkirim no. login & password transaksi,<br/>bukti konfirmasi penerimaan nasabah<br/>dan juga laporan transaksi harian/ daily statement.<br/>"
+        },
+        {
+            "no": 8,
+            "question": "Pada saat melakukan registrasi <b>Bapak/Ibu</b> anda memilih Jenis akun <b>Mini</b> dengan Tipe akun <b>{{.AccountType}}</b> dengan rate <b>Fix Rate Rp {{.CurrencyRate}}</b> dan dikenakan biaya komisi<br/><b>Normal</b> $/lot, Jenis transaksi yang dipilih <b>Bapak/Ibu  adalah SPA {{.ProductServicePlatform}}</b>, Rencananya berapa nominal yang akan disetor <b>$</b>"
+        },
+        {
+            "no": 9,
+            "question": "<b>Bapak/Ibu</b> sudah membaca & mengerti semua dokumen yang ada dalam system registrasi online <b>PT. PANEN KAPITAL BERJANGKA</b> antara lain :<ul><li>isi dokumen Perjanjian Pemberian Amanat nasabah</li><li>Dokumen Pemberitahuan Adanya resiko</li><li>Ketentuan dan Peraturan perdagangan (Trading Rules)</li></ul>"
+        },
+        {
+            "no": 10,
+            "question": "Benar bahwa <b>Bapak/Ibu {{.Name}}</b> sudah memahami mengenai resiko transaksi , dimana bahwa kemungkinan kerugian<br/>atau keuntungan dalam perdagangan Kontrak Derivatif dalam Sistem Perdagangan Alternatif bisa mencapai jumlah yang sangat besar.<br/>Oleh karena itu, <b>Bapak/Ibu</b> harus berhati-hati dalam memutuskan untuk melakukan transaksi, apakah kondisi keuangan <b>Bapak/Ibu</b> mencukup."
+        },
+        {
+            "no": 11,
+            "question": "Apakah benar <b>Bapak/Ibu</b>.<br/>sudah melakukan simulasi atau demo account pada system <b>PT. PANEN KAPITAL BERJANGKA</b> dengan no. demo account <b>{{.AccountID}}</b>"
+        },
+        {
+            "no": 12,
+            "question": "Apakah Bapak/Ibu punya pengalaman dalam bertransaksi dibidang ini ? <b>YA</b>, Perusahaan Investasi Sebelumnya"
+        },
+        {
+            "no": 13,
+            "question": "Apakah ada pihak yang menjanjikan pasti untung atau mungkin fixed income dalam pembukaan akun ini ......"
+        },
+        {
+            "no": 14,
+            "question": "Apakah dana yang digunakan dalam pembukaan akun ini adalah benar milik <b>Bapak/Ibu {{.Name}}</b><br/>dan Bukan milik orang lain atau kumpulan dana dari pihak lain ?......"
+        },
+        {
+            "no": 15,
+            "question": "Dalam pembukaan akun ini, tidak boleh ada perjanjian lain selain perjanjian dengan<br/><b>PT. PANEN KAPITAL BERJANGKA</b>. Jika ada, <b>PT. PANEN KAPITAL BERJANGKA</b> tidak bertanggung jawab."
+        },
+        {
+            "no": 16,
+            "question": "Untuk dokumen perjanjian nasabah dan dokumen pendukung nanti bisa<br/><b>Bapak/Ibu</b> .lihat di cabinet."
+        },
+        {
+            "no": 17,
+            "question": "Login ID & Password akan dikirim ke email yang telah terdaftar di Cabinet. Password transaksi mohon segera diganti<br/>dan dijaga kerahasiaannya. Login ID & Password bersifat rahasia, bapak/ibu tidak diperkenankan memberikan Login ID & Password ke pihak lain,<br/>jika terjadi penyalahgunaan itu bukan merupakan tanggung jawab <b>PT. PANEN KAPITAL BERJANGKA</b>"
+        },
+        {
+            "no": 18,
+            "question": "<b>PT. PANEN KAPITAL BERJANGKA</b> berharap Bapak/Ibu melakukan transaksi sendiri dan segala resiko menjadi tanggung jawab <b>Bapak/Ibu</b> sendiri."
+        },
+        {
+            "no": 19,
+            "question": "Sebutkan Nomer rekening Bank yang akan digunakan untuk mengirim margin dan menerima dana hasil transaksi Bapak/Ibu ?<br/>{{bank_list}}"
+        },
+        {
+            "no": 20,
+            "question": "Jika <b>Bapak/Ibu</b> telah setuju maka silahkan transfer dana<br/>ke Rekening Terpisah (Segregated Account) atas nama <b>PT. PANEN KAPITAL BERJANGKA</b><br/>Bank Central Asia (BCA)<br/>0357527531( IDR )<br/><br/>Bank Panin<br/>1005007561( IDR )<br/><br/>Bank Central Asia (BCA)<br/>0357537545( USD )<br/><br/>Bank Panin<br/>1006001386( USD )"
+        },
+        {
+            "no": 21,
+            "question": "Sampai disini apakah masih ada yang perlu ditanyakan saya persilakan,<br/>jika tidak ada saya sudahi Konfirmasi dan Verifikasi pembukaan akun ini."
+        },
+        {
+            "no": 22,
+            "question": "Terima kasih atas waktunya."
+        }
+    ],
+    "ppatk_checklist": [
+        {
+            "no": 1,
+            "question": "Apakah Nama Tgl lahir dan Tempat lahir tidak Sama dng list DTTOT"
+        },
+        {
+            "no": 2,
+            "question": "Apakah Alamat tidak Sama dng list DTTOT ?"
+        },
+        {
+            "no": 3,
+            "question": "Apakah email dan No Tlp tidak sama dengan DTTOT ?"
+        },
+        {
+            "no": 4,
+            "question": "Apakah Wakil pialang bertugas sudah cek dengan Manual ? "
+        }
+    ]
+}

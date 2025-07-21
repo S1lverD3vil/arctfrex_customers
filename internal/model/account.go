@@ -1,6 +1,9 @@
 package model
 
 import (
+	"database/sql/driver"
+	"encoding/json"
+	"fmt"
 	"strings"
 	"time"
 
@@ -29,6 +32,7 @@ type Account struct {
 	MetaLoginPassword        string                      `json:"meta_login_password"`
 	RealAccountCallRecording string                      `json:"realaccount_callrecording"`
 	NoAggreement             string                      `json:"no_aggreement"`
+	SurveyResult             SurveyResult                `gorm:"type:jsonb" json:"survey_result"` // Column for the array of obj
 
 	base.BaseModel
 }
@@ -188,4 +192,71 @@ type ReportProfitLossData struct {
 	NetProfitUSD          float64 `json:"net_profit_usd"`
 	AccountID             int64   `json:"accountid"`
 	UserID                int64   `json:"userid"`
+}
+
+type SurveyQuestionData struct {
+	No     int  `json:"no"`
+	Answer bool `json:"answer"`
+}
+
+type SurveyResult struct {
+	SurveyChecklist []SurveyQuestionData `json:"survey_checklist"`
+	PpatkChecklist  []SurveyQuestionData `json:"ppatk_checklist"`
+}
+
+// Save to DB (jsonb)
+
+// Marshal to JSONB
+func (b SurveyResult) Value() (driver.Value, error) {
+	return json.Marshal(b)
+}
+
+// Unmarshal from JSONB
+func (b *SurveyResult) Scan(value interface{}) error {
+	bytes, ok := value.([]byte)
+	if !ok {
+		return fmt.Errorf("failed to unmarshal JSONB value: %v", value)
+	}
+	return json.Unmarshal(bytes, b)
+}
+
+type SurveyData struct {
+	PhoneNumber            string       `json:"phone_number"`
+	NoIdentity             string       `json:"no_identity"`
+	Address                string       `json:"address"`
+	DomProvince            string       `json:"dom_province"`
+	Profession             string       `json:"profession"`
+	MotherName             string       `json:"mother_name"`
+	Email                  string       `json:"email"`
+	Name                   string       `json:"name"`
+	AccountType            string       `json:"account_type"`
+	CurrencyRate           float64      `json:"currency_rate"`
+	ProductServicePlatform string       `json:"product_service_platform"`
+	AccountID              int          `json:"account_id"`
+	BankList               BankList     `gorm:"type:jsonb" json:"bank_list"`
+	SurveyResult           SurveyResult `gorm:"type:jsonb" json:"survey_result"`
+}
+
+type SurveyDataTemplate struct {
+	PhoneNumber            string       `json:"phone_number"`
+	NoIdentity             string       `json:"no_identity"`
+	Address                string       `json:"address"`
+	DomProvince            string       `json:"dom_province"`
+	Profession             string       `json:"profession"`
+	MotherName             string       `json:"mother_name"`
+	Email                  string       `json:"email"`
+	Name                   string       `json:"name"`
+	AccountType            string       `json:"account_type"`
+	CurrencyRate           float64      `json:"currency_rate"`
+	ProductServicePlatform string       `json:"product_service_platform"`
+	AccountID              int          `json:"account_id"`
+	Banks                  BankList     `json:"banks"`
+	SurveyResult           SurveyResult `json:"survey_result"`
+}
+
+type Banklist struct {
+	Index               int    `json:"index"`
+	BankName            string `json:"bank_name"`
+	BankAccountNumber   string `json:"bank_account_number"`
+	BankBeneficiaryName string `json:"bank_beneficiary_name"`
 }

@@ -25,6 +25,7 @@ type AccountRepository interface {
 	UpdateAccount(account *model.Account) error
 	UpdateAccountApprovalStatus(account *model.Account) error
 	UpdateRealAccountCallRecording(account *model.Account) error
+	GetBackOfficeAccountQuestions(userid string, accountID string) (*model.SurveyData, error)
 }
 
 type accountRepository struct {
@@ -340,4 +341,37 @@ func (ar *accountRepository) UpdateAccountApprovalStatus(account *model.Account)
 
 func (ar *accountRepository) UpdateRealAccountCallRecording(account *model.Account) error {
 	return ar.db.Select("RealAccountCallRecording").Updates(account).Error
+}
+
+func (ar *accountRepository) GetBackOfficeAccountQuestions(userid string, accountID string) (*model.SurveyData, error) {
+	var surveyData model.SurveyData
+	if err := ar.db.Table("users").
+		Joins("LEFT JOIN user_profiles ON user_profiles.id = users.id AND user_profiles.is_active = ?", true).
+		Joins("LEFT JOIN user_addresses ON user_addresses.id = users.id AND user_addresses.is_active = ?", true).
+		Joins("LEFT JOIN user_finances ON user_finances.id = users.id AND user_finances.is_active = ?", true).
+		Joins("LEFT JOIN user_employments ON user_employments.id = users.id AND user_employments.is_active = ?", true).
+		Joins("LEFT JOIN accounts ON accounts.user_id = users.id AND accounts.is_active = ? AND accounts.id = ?", true, accountID).
+		Select(`
+			users.mobile_phone AS phone_number,
+			user_profiles.ktp_number AS no_identity,
+			user_addresses.dom_address AS address,
+			user_addresses.dom_province AS dom_province,
+			user_employments.profession,
+			user_profiles.mother_maiden AS mother_name,
+			users.email,
+			users.name,
+			user_finances.account_type,
+			user_finances.currency_rate,
+			user_finances.product_service_platform,
+			(SELECT accounts.meta_login_id FROM accounts WHERE accounts.user_id = users.id AND accounts.is_active = true AND accounts.type = 2) AS account_id,
+			user_finances.bank_list,
+			accounts.survey_result
+		`).
+		Where("users.id = ? AND users.is_active = ?", userid, true).
+		Scan(&surveyData).Error; err != nil {
+
+		return nil, err
+	}
+
+	return &surveyData, nil
 }

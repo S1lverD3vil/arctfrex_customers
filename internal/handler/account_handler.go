@@ -36,6 +36,8 @@ func NewAccountHandler(
 
 	unprotectedRoutesBackOffice.GET("/:menutype", handler.BackOfficeAccountByMenuType)
 
+	unprotectedRoutesBackOffice.GET("questions/:accountid/:userid", handler.BackOfficeQuestions)
+
 	// unprotectedRoutesBackOffice.POST("/pending", handler.BackOfficePending)
 	unprotectedRoutesBackOffice.POST("/pending/approval", handler.BackOfficePendingApproval)
 	protectedRoutes.Use(jmw.ValidateToken())
@@ -255,5 +257,30 @@ func (ah *accountHandler) BackOfficeAccountByMenuType(c *gin.Context) {
 	c.JSON(
 		http.StatusOK,
 		base.ApiPaginatedResponse{Message: "success", Data: response.Data, Pagination: *response.Pagination},
+	)
+}
+
+func (ah *accountHandler) BackOfficeQuestions(c *gin.Context) {
+	userID := c.Param("userid")
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "userID is required"})
+		return
+	}
+
+	accountID := c.Param("accountid")
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "accountID is required"})
+		return
+	}
+
+	response, err := ah.accountUsecase.BackOfficeQuestions(c.Request.Context(), userID, accountID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		base.ApiResponse{Message: "success", Data: response.Data},
 	)
 }
