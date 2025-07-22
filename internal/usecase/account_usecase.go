@@ -295,7 +295,7 @@ func (au *accountUsecase) BackOfficeQuestions(ctx context.Context, userID string
 		}
 
 		response.Data.SurveyChecklist[i].Question = survey.Question
-		if survey.No == surveyData.SurveyResult.SurveyChecklist[i].No {
+		if i < len(surveyData.SurveyResult.SurveyChecklist) && survey.No == surveyData.SurveyResult.SurveyChecklist[i].No {
 			response.Data.SurveyChecklist[i].Answer = surveyData.SurveyResult.SurveyChecklist[i].Answer
 		}
 	}
@@ -306,7 +306,7 @@ func (au *accountUsecase) BackOfficeQuestions(ctx context.Context, userID string
 			return response, err
 		}
 		response.Data.PpatkChecklist[i].Question = rendered
-		if survey.No == surveyData.SurveyResult.PpatkChecklist[i].No {
+		if i < len(surveyData.SurveyResult.PpatkChecklist) && survey.No == surveyData.SurveyResult.PpatkChecklist[i].No {
 			response.Data.PpatkChecklist[i].Answer = surveyData.SurveyResult.PpatkChecklist[i].Answer
 		}
 	}
@@ -332,8 +332,12 @@ func (*accountUsecase) GetQuestions() (response model.SurveyResponse, err error)
 	}
 
 	cwd, _ := os.Getwd()
-	parentDir := filepath.Dir(cwd)
-	jsonFile, err := os.Open(filepath.Join(parentDir, path))
+	directoryTemplate := filepath.Join(cwd, path)
+	if filepath.Base(cwd) == "cmd" {
+		directoryTemplate = filepath.Join(cwd, "../", path)
+	}
+
+	jsonFile, err := os.Open(directoryTemplate)
 	if err != nil {
 		panic(err)
 	}
