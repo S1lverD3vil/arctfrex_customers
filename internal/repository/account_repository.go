@@ -24,6 +24,7 @@ type AccountRepository interface {
 	GetReportProfitLoss(startDate, endDate string) (*[]model.ReportProfitLossData, error)
 	UpdateAccount(account *model.Account) error
 	UpdateAccountApprovalStatus(account *model.Account) error
+	UpdateSurveyResult(account *model.Account) error
 	UpdateRealAccountCallRecording(account *model.Account) error
 	GetBackOfficeAccountQuestions(userid string, accountID string) (*model.SurveyData, error)
 }
@@ -337,6 +338,12 @@ func (ar *accountRepository) UpdateAccountApprovalStatus(account *model.Account)
 		"MetaLoginId",
 		"MetaLoginPassword",
 	).Updates(account).Error
+}
+
+func (ar *accountRepository) UpdateSurveyResult(account *model.Account) error {
+	return ar.db.Select(
+		"survey_result",
+	).Updates(account).Where("id = ? AND user_id = ? AND is_active = ?", account.ID, account.UserID, true).Error
 }
 
 func (ar *accountRepository) UpdateRealAccountCallRecording(account *model.Account) error {

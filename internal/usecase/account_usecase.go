@@ -33,6 +33,7 @@ type AccountUsecase interface {
 	BackOfficeAll(request model.BackOfficeAllAccountRequest) (response model.BackOfficeAllAccountResponse, err error)
 	BackOfficeAccountByMenuType(request model.BackOfficeAccountByMenuTypeRequest) (response model.BackOfficeAccountByMenuTypeResponse, err error)
 	BackOfficeQuestions(ctx context.Context, userID string, accountID string) (response model.SurveyResponse, err error)
+	BackOfficeAnswers(ctx context.Context, request model.SurveyAnswerRequest) (response model.SurveyAnswerResponse, err error)
 	BackOfficePending(request model.BackOfficePendingAccountRequest) (response model.BackOfficePendingAccountResponse, err error)
 	BackOfficePendingApproval(backOfficePendingApproval model.BackOfficePendingAccountApprovalRequest) error
 }
@@ -267,6 +268,7 @@ func (au *accountUsecase) BackOfficeQuestions(ctx context.Context, userID string
 	}
 
 	for i, survey := range response.Data.SurveyChecklist {
+		rendered := ""
 		if survey.No == 19 {
 			tpl := `Rekening {{.Index}}:<br/><b>{{.BankName}}<br/>No Rek {{.BankAccountNumber}}<br/>atas {{.BankBeneficiaryName}}</b><br/><br/>`
 
@@ -287,14 +289,13 @@ func (au *accountUsecase) BackOfficeQuestions(ctx context.Context, userID string
 			}
 			survey.Question = strings.ReplaceAll(survey.Question, "{{bank_list}}", renderedBanks.String())
 		} else {
-			rendered, err := renderTemplateString(survey.Question, surveyData)
+			rendered, err = renderTemplateString(survey.Question, surveyData)
 			if err != nil {
 				return response, err
 			}
-			response.Data.SurveyChecklist[i].Question = rendered
 		}
 
-		response.Data.SurveyChecklist[i].Question = survey.Question
+		response.Data.SurveyChecklist[i].Question = rendered
 		if i < len(surveyData.SurveyResult.SurveyChecklist) && survey.No == surveyData.SurveyResult.SurveyChecklist[i].No {
 			response.Data.SurveyChecklist[i].Answer = surveyData.SurveyResult.SurveyChecklist[i].Answer
 		}
@@ -357,4 +358,26 @@ func (*accountUsecase) GetQuestions() (response model.SurveyResponse, err error)
 	response.Data.PpatkChecklist = result.PpatkChecklist
 
 	return response, err
+}
+
+func (au *accountUsecase) BackOfficeAnswers(ctx context.Context, request model.SurveyAnswerRequest) (response model.SurveyAnswerResponse, err error) {
+	err = au.accountRepository.UpdateSurveyResult(&model.Account{
+		ID:     request.AccountID,
+		UserID: request.UserID,
+		SurveyResult: model.SurveyResult{
+			SurveyChecklist: request.SurveyChecklist,
+			PpatkChecklist:  request.PpatkChecklist,
+		},
+	})
+	if err != nil {
+		return response, errors.New("failed to update survey result")
+	}
+
+	// Prepare response data
+	response = model.SurveyAnswerResponse{
+		SurveyChecklist: request.SurveyChecklist,
+		PpatkChecklist:  request.PpatkChecklist,
+	}
+
+	return
 }

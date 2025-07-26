@@ -37,6 +37,7 @@ func NewAccountHandler(
 	unprotectedRoutesBackOffice.GET("/:menutype", handler.BackOfficeAccountByMenuType)
 
 	unprotectedRoutesBackOffice.GET("questions/:accountid/:userid", handler.BackOfficeQuestions)
+	unprotectedRoutesBackOffice.PATCH("answers/:accountid/:userid", handler.BackOfficeAnswers)
 
 	// unprotectedRoutesBackOffice.POST("/pending", handler.BackOfficePending)
 	unprotectedRoutesBackOffice.POST("/pending/approval", handler.BackOfficePendingApproval)
@@ -282,5 +283,39 @@ func (ah *accountHandler) BackOfficeQuestions(c *gin.Context) {
 	c.JSON(
 		http.StatusOK,
 		base.ApiResponse{Message: "success", Data: response.Data},
+	)
+}
+
+func (ah *accountHandler) BackOfficeAnswers(c *gin.Context) {
+	var request model.SurveyAnswerRequest
+
+	userID := c.Param("userid")
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "userID is required"})
+		return
+	}
+
+	accountID := c.Param("accountid")
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "accountID is required"})
+		return
+	}
+
+	request.UserID = userID
+	request.AccountID = accountID
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	response, err := ah.accountUsecase.BackOfficeAnswers(c.Request.Context(), request)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		base.ApiResponse{Message: "success", Data: response},
 	)
 }

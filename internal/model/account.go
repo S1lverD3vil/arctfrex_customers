@@ -204,6 +204,18 @@ type SurveyResult struct {
 	PpatkChecklist  []SurveyQuestionData `json:"ppatk_checklist"`
 }
 
+type SurveyAnswerRequest struct {
+	UserID          string               `json:"user_id"`
+	AccountID       string               `json:"account_id"`
+	SurveyChecklist []SurveyQuestionData `json:"survey_checklist"`
+	PpatkChecklist  []SurveyQuestionData `json:"ppatk_checklist"`
+}
+
+type SurveyAnswerResponse struct {
+	SurveyChecklist []SurveyQuestionData `json:"survey_checklist"`
+	PpatkChecklist  []SurveyQuestionData `json:"ppatk_checklist"`
+}
+
 // Save to DB (jsonb)
 
 // Marshal to JSONB
