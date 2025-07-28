@@ -287,7 +287,7 @@ func (au *accountUsecase) BackOfficeQuestions(ctx context.Context, userID string
 				}
 				renderedBanks.WriteString(rendered)
 			}
-			survey.Question = strings.ReplaceAll(survey.Question, "{{bank_list}}", renderedBanks.String())
+			rendered = strings.ReplaceAll(survey.Question, "{{bank_list}}", renderedBanks.String())
 		} else {
 			rendered, err = renderTemplateString(survey.Question, surveyData)
 			if err != nil {
